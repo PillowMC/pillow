@@ -1,0 +1,9 @@
+{
+    "package": "net.pillowmc.pillow.asm.mc",
+    "minVersion": "0.7",
+    "mixins": [
+        "KnotMixin"
+    ],
+    "client": [],
+    "server": []
+}
