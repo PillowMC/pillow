@@ -23,16 +23,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Nix Shell
-      uses: workflow/nix-shell-action@v3.0.2
-      with:
-        script: chmod +x ./gradlew
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
     - name: Build with Gradle
       uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
       with:
