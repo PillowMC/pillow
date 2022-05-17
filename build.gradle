@@ -43,7 +43,7 @@ minecraft {
     // Simply re-run your setup task after changing the mappings to update your workspace.
     mappings channel: 'official', version: '1.18.2'
 
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+    accessTransformer = file('src/main/resources/META-INF/quilt.at.cfg') // Currently, this location cannot be changed from the default.
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -169,16 +169,16 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.18.2-40.0.19'
-    embed ("org.quiltmc:quilt-loader:0.16.0-beta.16") {
+    implementation ("org.quiltmc:quilt-loader:0.16.0-beta.16") {
         exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
     }
-    embed "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
-    embed ("net.fabricmc:tiny-remapper:0.8.1") {
+    implementation "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
+    implementation ("net.fabricmc:tiny-remapper:0.8.1") {
         exclude group: "org.ow2.asm"
     }
-    embed "net.fabricmc:access-widener:2.1.0"
-    embed "org.quiltmc:quilt-json5:1.0.1"
+    implementation "net.fabricmc:access-widener:2.1.0"
+    implementation "org.quiltmc:quilt-json5:1.0.1"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
@@ -196,6 +196,7 @@ dependencies {
 mixin {
     add sourceSets.main, 'mixins.pillow.refmap.json'
     config 'net/pillowmc/pillow/asm/mc/mixins.pillow.mc.json'
+    config 'net/pillowmc/pillow/asm/quilt/mixins.pillow.quilt.json'
     debug.verbose = true
     debug.export = true
 }
@@ -215,7 +216,7 @@ jar {
                 "MixinConnector": "net.pillowmc.pillow.asm.PillowConnector"
         ])
     }
-    from { configurations.embed.collect { it.isDirectory() ? it : zipTree(it) } }
+    // from { configurations.embed.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 // Example configuration to allow publishing using the maven-publish plugin

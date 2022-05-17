@@ -2,6 +2,7 @@ package net.pillowmc.pillow;
 
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModDependency;
 import net.fabricmc.loader.launch.common.FabricLauncher;
@@ -36,8 +37,7 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public String getRawGameVersion() {
-        return Launcher.INSTANCE.environment()
-                .getProperty(IEnvironment.Keys.VERSION.get()).orElse("");
+        return "1.18.2";
     }
 
     @Override
@@ -57,12 +57,12 @@ public class PillowGameProvider implements GameProvider {
         BuiltinModMetadata.Builder forgeMetadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
                 .setName("forge");
         try {
-            minecraftMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, getGameName(), Collections.singletonList(String.format("=%s", getRawGameVersion()))));
+            forgeMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, getGameId(), Collections.singletonList(String.format("=%s", getRawGameVersion()))));
         } catch (VersionParsingException e) {
             throw new RuntimeException(e);
         }
         try {
-            return Arrays.asList(new BuiltinMod(Collections.singletonList(Paths.get(MinecraftServer.class.getProtectionDomain().getCodeSource().getLocation().toURI())), minecraftMetadata.build()),
+            return Arrays.asList(new BuiltinMod(Collections.singletonList(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), minecraftMetadata.build()),
                     new BuiltinMod(Collections.singletonList(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), forgeMetadata.build())
             );
         } catch (URISyntaxException e) {
@@ -72,10 +72,9 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public String getEntrypoint() {
-        try{
-            Class.forName("net.minecraft.client.main.Main");
+        if(Utils.getSide()== EnvType.CLIENT){
             return "net.minecraft.client.main.Main";
-        } catch (ClassNotFoundException e) {
+        }else{
             return "net.minecraft.server.Main";
         }
     }

@@ -3,7 +3,6 @@
     "minVersion": "0.7",
     "mixins": [],
     "client": [
-        "client.ClientMainMixin"
     ],
     "server": []
 }
