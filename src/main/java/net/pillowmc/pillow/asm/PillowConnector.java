@@ -7,8 +7,7 @@ public class PillowConnector implements IMixinConnector {
     @Override
     public void connect() {
         Mixins.addConfigurations(
-            "net/pillowmc/pillow/asm/mc/mixins.pillow.mc.json",
-            "net/pillowmc/pillow/asm/quilt/mixins.pillow.quilt.json"
+            "net/pillowmc/pillow/asm/mc/mixins.pillow.mc.json"
         );
     }
 }

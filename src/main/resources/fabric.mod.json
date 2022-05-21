@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "pillow",
+  "name": "Pillow Loader",
+  "version": "0.14.5",
+  "provides": [
+    "fabricloader"
+  ],
+  "environment": "*",
+  "description": "The base Fabric/Pillow mod loader that works on Forge.",
+  "contact": {
+    "homepage": "https://pillowmc.github.io",
+    "issues": "https://github.com/PillowMC/Pillow/issues",
+    "sources": "https://github.com/PillowMC/Pillow",
+    "fabric_homepage": "https://fabricmc.net",
+    "fabric_irc": "irc://irc.esper.net:6667/fabric",
+    "fabric_issues": "https://github.com/FabricMC/fabric/issues",
+    "fabric_sources": "https://github.com/FabricMC/fabric"
+  },
+  "license": "MIT",
+  "icon": "assets/pillow/icon.png",
+  "authors": [
+    "HeiPiao",
+    "FabricMC"
+  ]
+}

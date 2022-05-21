@@ -5,22 +5,22 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModDependency;
-import net.fabricmc.loader.launch.common.FabricLauncher;
-import net.minecraft.server.MinecraftServer;
+import net.fabricmc.loader.impl.launch.FabricLauncher;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLServiceProvider;
 
-import org.quiltmc.loader.impl.entrypoint.GameTransformer;
-import org.quiltmc.loader.impl.game.GameProvider;
-import org.quiltmc.loader.impl.metadata.BuiltinModMetadata;
-import org.quiltmc.loader.impl.metadata.ModDependencyImpl;
-import org.quiltmc.loader.impl.util.Arguments;
+import net.fabricmc.loader.impl.game.patch.GameTransformer;
+import net.fabricmc.loader.impl.game.GameProvider;
+import net.fabricmc.loader.impl.metadata.BuiltinModMetadata;
+import net.fabricmc.loader.impl.metadata.ModDependencyImpl;
+import net.fabricmc.loader.impl.util.Arguments;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public class PillowGameProvider implements GameProvider {
     private String[] args;
@@ -50,20 +50,20 @@ public class PillowGameProvider implements GameProvider {
         BuiltinModMetadata.Builder minecraftMetadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
                 .setName(getGameName());
         try {
-            minecraftMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, "java", Collections.singletonList(String.format(">=%d", 17))));
+            minecraftMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, "java", List.of(String.format(">=%d", 17))));
         } catch (VersionParsingException e) {
             throw new RuntimeException(e);
         }
-        BuiltinModMetadata.Builder forgeMetadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
+        BuiltinModMetadata.Builder forgeMetadata = new BuiltinModMetadata.Builder("forge", FMLLoader.versionInfo().forgeVersion())
                 .setName("forge");
         try {
-            forgeMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, getGameId(), Collections.singletonList(String.format("=%s", getRawGameVersion()))));
+            forgeMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, getGameId(), List.of(String.format("=%s", getRawGameVersion()))));
         } catch (VersionParsingException e) {
             throw new RuntimeException(e);
         }
         try {
-            return Arrays.asList(new BuiltinMod(Collections.singletonList(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), minecraftMetadata.build()),
-                    new BuiltinMod(Collections.singletonList(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), forgeMetadata.build())
+            return Arrays.asList(new BuiltinMod(List.of(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), minecraftMetadata.build()),
+                    new BuiltinMod(List.of(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), forgeMetadata.build())
             );
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
