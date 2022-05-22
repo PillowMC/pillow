@@ -47,6 +47,6 @@ public class EntryPointTransformer implements ITransformer<MethodNode> {
 
     @Override
     public @NotNull Set<Target> targets() {
-        return Set.of(Target.targetMethod("net/minecraft/client/Minecraft", "<init>", "Lnet/minecraft/client/main/GameConfig;"));
+        return Set.of(Target.targetMethod("net.minecraft.client.Minecraft", "<init>", "(Lnet/minecraft/client/main/GameConfig;)V"));
     }
 }
