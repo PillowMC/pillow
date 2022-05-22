@@ -29,12 +29,12 @@ displayName="Pillow" #mandatory
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="pillow.png" #optional
 # A text field displayed in the mod UI
-credits="QulitMC, MinecraftForge" #optional
+credits="FabricMC, MinecraftForge" #optional
 # A text field displayed in the mod UI
 authors="PillowMC, HeiPiao" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Use Qulit on Forge!
+Use Fabric on Forge!
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.pillow]] #optional
