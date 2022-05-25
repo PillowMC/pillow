@@ -31,7 +31,7 @@ public class PillowJavaAgent implements ClassFileTransformer {
                 if(in instanceof LdcInsnNode ldcInsnNode){
                     if(ldcInsnNode.cst instanceof String cst){
                         if(cst.equals("mods")) {
-                            cst = "fabmods";
+                            cst = "fabricMods";
                             ldcInsnNode.cst=cst;
                             return ldcInsnNode;
                         }

@@ -40,7 +40,7 @@ public class PillowTransformationService extends FabricLauncherBase implements I
     private static final Method UFSPCreate;
     private static Unsafe unsafe;
     private static long offset;
-    private final Path remapCP = Files.createTempFile("pillowremapping", ".cp");
+    private final Path remapCP = Files.createTempFile("pillowRemapping", ".cp");
     static {
         try {
             UFSPCreate=UFSPClass.getMethod("newFileSystem", BiPredicate.class, Path[].class);
@@ -101,8 +101,8 @@ public class PillowTransformationService extends FabricLauncherBase implements I
     //     }
     // }
     @Override
-    public List<Resource> completeScan(IModuleLayerManager layerManager) {
-        Log.info(LogCategory.DISCOVERY, "Completing scan with classpath [%s]", cp);
+    public List<Resource> completeScan(IModuleLayerManager environment) {
+        Log.info(LogCategory.DISCOVERY, "Beginning scanning with classpath [%s]", cp);
         List<Path> paths=cp.stream()
             .filter((path)->!path.getClass().getName().contains("Union"))
             .collect(Collectors.toUnmodifiableList());
@@ -130,36 +130,7 @@ public class PillowTransformationService extends FabricLauncherBase implements I
     }
 
     private static JarMetadata createJM(SecureJar sj){
-        return new SimpleJarMetadata("fabricmod", "1.0.0", sj.getPackages(), sj.getProviders());
-    }
-
-    private static Path getUFSPath(Path path) {
-        if(path.getClass().getName().contains("Union")){
-            FileSystem fs=path.getFileSystem();
-            Class<?> fsc = fs.getClass();
-            try {
-                unsafe.putObject(PillowTransformationService.class, offset, fsc.getModule());
-                return (Path) fsc.getMethod("getPrimaryPath").invoke(fs);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return path;
-    }
-
-    private static Path getZipPath(Path path) {
-        if(path.getClass().getName().contains("Zip")){
-            unsafe.putObject(PillowTransformationService.class, offset, path.getClass().getModule());
-            Class<?> fsc=path.getFileSystem().getClass();
-            try {
-                Field field=fsc.getDeclaredField("zfpath");
-                field.setAccessible(true);
-                return (Path) field.get(path.getFileSystem());
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return path;
+        return new SimpleJarMetadata("fabricMod", "1.0.0", sj.getPackages(), sj.getProviders());
     }
 
     private GameProvider provider;
@@ -210,7 +181,7 @@ public class PillowTransformationService extends FabricLauncherBase implements I
 
     @Override
     public ClassLoader getTargetClassLoader() {
-        return this.getClass().getClassLoader();
+        return Thread.currentThread().getContextClassLoader();
     }
 
     @Override
