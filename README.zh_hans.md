@@ -14,7 +14,7 @@ _尚未实现_
 
 没错，这个模组会让 Fabric 兼容 Forge 。
 
-_不要把模组放到 mods 文件夹，放到 fabricMods 里。_
+_不要把 Fabric 模组放到 mods 文件夹，放到 fabricMods 里。_
 
 ## 另一个 mod loader
 
