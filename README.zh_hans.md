@@ -6,6 +6,8 @@
 ![Github PRs](https://img.shields.io/github/issues-pr/PillowMC/pillow.svg)
 ![Github Action Status](https://img.shields.io/github/workflow/status/PillowMC/pillow/Java%20CI%20with%20Gradle/dev.svg)
 
+中文 | [English](README.md)
+
 ## 运行在 Forge 上的 Fabric
 
 _尚未实现_
