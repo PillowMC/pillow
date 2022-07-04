@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "net.pillowmc",
+    "id": "pillow",
+    "version": "${version}",
+    "metadata": {
+      "name": "Pillow Mod Loader",
+      "description": "The mod-loader that cares and works on Forge.",
+      "contributors": {
+        "PillowMC": "Owner",
+        "QuiltMC": "Quilt Owner"
+      },
+      "contact": {
+        "homepage": "https://pillowmc.github.io",
+        "issues": "https://github.com/PillowMC/Pillow/issues",
+        "sources": "https://github.com/PillowMC/Pillow",
+        "quilt_homepage": "https://quiltmc.org",
+        "quilt_issues": "https://github.com/QuiltMC/quilt-loader/issues",
+        "quilt_sources": "https://github.com/QuiltMC/quilt-loader"
+      },
+      "license": "MIT",
+      "icon": "assets/pillow/icon.png"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "provides": [
+      {
+        "id": "fabricloader",
+        "version": "0.14.8"
+      },
+      {
+        "id": "quilt_loader",
+        "version": "0.17.1-beta.5"
+      }
+    ]
+  }
+}

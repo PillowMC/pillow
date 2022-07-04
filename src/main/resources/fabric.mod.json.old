@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "pillow",
-  "name": "Pillow Loader",
-  "version": "0.14.5",
+  "name": "Pillow Mod Loader",
+  "version": "${version}",
   "provides": [
     "fabricloader"
   ],

@@ -9,7 +9,7 @@ public class Utils {
     public static EnvType getSide() {
         if(side!=null)return side;
         return side=Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.LAUNCHTARGET.get())
-                .orElse("client")
+                .orElseThrow(()->new IllegalStateException("ModLauncher initializes \"ITransformingService\"s without launchTarget! WON'T POSSIBLE!"))
                 .contains("client") ? EnvType.CLIENT : EnvType.SERVER;
     }
 }

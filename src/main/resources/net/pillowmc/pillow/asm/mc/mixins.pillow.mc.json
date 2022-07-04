@@ -1,9 +1,0 @@
-{
-    "package": "net.pillowmc.pillow.asm.mc",
-    "minVersion": "0.7",
-    "mixins": [],
-    "client": [
-        "client.MainMixin"
-    ],
-    "server": []
-}

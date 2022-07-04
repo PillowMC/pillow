@@ -5,15 +5,14 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModDependency;
-import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLServiceProvider;
-
-import net.fabricmc.loader.impl.game.patch.GameTransformer;
-import net.fabricmc.loader.impl.game.GameProvider;
-import net.fabricmc.loader.impl.metadata.BuiltinModMetadata;
-import net.fabricmc.loader.impl.metadata.ModDependencyImpl;
-import net.fabricmc.loader.impl.util.Arguments;
+import org.quiltmc.loader.impl.entrypoint.GameTransformer;
+import org.quiltmc.loader.impl.game.GameProvider;
+import org.quiltmc.loader.impl.launch.common.QuiltLauncher;
+import org.quiltmc.loader.impl.metadata.BuiltinModMetadata;
+import org.quiltmc.loader.impl.metadata.ModDependencyImpl;
+import org.quiltmc.loader.impl.util.Arguments;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -62,8 +61,9 @@ public class PillowGameProvider implements GameProvider {
             throw new RuntimeException(e);
         }
         try {
-            return Arrays.asList(new BuiltinMod(List.of(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), minecraftMetadata.build()),
-                    new BuiltinMod(List.of(Paths.get(FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI())), forgeMetadata.build())
+            var path=FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            return Arrays.asList(new BuiltinMod(List.of(Paths.get(path)), minecraftMetadata.build()),
+                    new BuiltinMod(List.of(Paths.get(path)), forgeMetadata.build())
             );
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
@@ -101,13 +101,13 @@ public class PillowGameProvider implements GameProvider {
     }
 
     @Override
-    public boolean locateGame(FabricLauncher launcher, String[] args) {
+    public boolean locateGame(QuiltLauncher launcher, String[] args) {
         this.args=args;
         return true;
     }
 
     @Override
-    public void initialize(FabricLauncher launcher) {
+    public void initialize(QuiltLauncher launcher) {
     }
 
     @Override
@@ -116,7 +116,7 @@ public class PillowGameProvider implements GameProvider {
     }
 
     @Override
-    public void unlockClassPath(FabricLauncher launcher) {
+    public void unlockClassPath(QuiltLauncher launcher) {
 
     }
 

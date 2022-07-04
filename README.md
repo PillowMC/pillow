@@ -20,11 +20,11 @@ _Don't put Fabric mods in mods directory, put them in fabricMods directory!_
 
 _Will implement after running Fabric on Forge!_
 
-It will design mainly for "build bridges" between Forge and Fabric, but it may will be a full-usage mod loader. It will not replace Forge or Fabric. It will work well with them.
+It will design mainly for "build bridges" between Forge and Fabric, but it will be a full-usage mod loader. It will not replace Forge or Fabric. It will work well with them.
 
 ## Installing
 
-_Not opened yet._
+_Not developed yet._
 
 ## Support
 

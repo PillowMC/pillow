@@ -6,20 +6,21 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7.+'
+        // classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        // classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 plugins {
     id 'eclipse'
     id 'maven-publish'
+    id 'java'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
+// apply plugin: 'net.minecraftforge.gradle'
+// apply plugin: 'org.spongepowered.mixin'
 
 
-version = '1.0'
+version = "1.0"
 group = 'net.pillowmc.pillow' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'pillow'
 
@@ -27,131 +28,24 @@ archivesBaseName = 'pillow'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-minecraft {
-    // The mappings can be changed at any time and must be in the following format.
-    // Channel:   Version:
-    // official   MCVersion             Official field/method names from Mojang mapping files
-    // parchment  YYYY.MM.DD-MCVersion  Open community-sourced parameter names and javadocs layered on top of official
-    //
-    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
-    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //
-    // Parchment is an unofficial project maintained by ParchmentMC, separate from MinecraftForge
-    // Additional setup is needed to use their mappings: https://github.com/ParchmentMC/Parchment/wiki/Getting-Started
-    //
-    // Use non-default mappings at your own risk. They may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.18.2'
+// minecraft {
+//     mappings channel: 'official', version: '1.18.2'
+//     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+// }
 
-    accessTransformer = file('src/main/resources/META-INF/fabric.at.cfg') // Currently, this location cannot be changed from the default.
-
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
-    runs {
-        client {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'pillow'
-
-            mods {
-                pillow {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'pillow'
-
-            mods {
-                pillow {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'pillow'
-
-            mods {
-                pillow {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            property 'forge.logging.console.level', 'debug'
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'pillow', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                pillow {
-                    source sourceSets.main
-                }
-            }
-        }
+sourceSets {
+    langprovider{
+        compileClasspath += sourceSets.main.compileClasspath
+        compileClasspath += sourceSets.main.output
     }
 }
 
-// Include resources generated by data generators.
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
 repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
-    // flatDir {
-    //     dir 'libs'
-    // }
     maven { url = 'https://lss233.littleservice.cn/repositories/minecraft' }
+    maven { url = 'https://maven.minecraftforge.net' }
     maven {
-        name = 'FabricMC'
-        url = 'https://maven.fabricmc.net/'
+        name = 'QuiltMC'
+        url = 'https://maven.quiltmc.org/repository/release/'
     }
 }
 
@@ -161,39 +55,39 @@ configurations {
 }
 
 dependencies {
-    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.18.2-40.0.19'
-    implementation ("net.fabricmc:fabric-loader:0.14.5") {
-        exclude module: "sponge-mixin"
+    // minecraft 'net.minecraftforge:forge:1.18.2-40.1.25'
+    implementation 'net.minecraftforge:fmlloader:1.18.2-40.1.25'
+    implementation 'net.minecraftforge:fmlcore:1.18.2-40.1.25'
+    implementation "cpw.mods:modlauncher:10.0.1"
+    implementation "cpw.mods:securejarhandler:1.0.5"
+    implementation "commons-io:commons-io:2.11.0"
+//    implementation "org.spongepowered:mixin:0.8.5"
+    implementation "org.jetbrains:annotations:23.0.0"
+    implementation ("org.quiltmc:quilt-loader:0.17.1-beta.5") {
+//        exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
     }
+    implementation "net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5"
     implementation "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
     implementation ("net.fabricmc:tiny-remapper:0.8.2") {
         exclude group: "org.ow2.asm"
     }
     implementation "net.fabricmc:access-widener:2.1.0"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
-    // Real mod deobf dependency examples - these get remapped to your current mappings
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
-    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
-
-    // Examples using mod jars from ./libs
-    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+//    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
-mixin {
-    add sourceSets.main, 'mixins.pillow.refmap.json'
-    config 'net/pillowmc/pillow/asm/mc/mixins.pillow.mc.json'
-    debug.verbose = true
-    debug.export = true
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("quilt.mod.json") {
+        expand "version": project.version
+    }
 }
+// mixin {
+//     add sourceSets.main, 'mixins.pillow.refmap.json'
+//     config 'net/pillowmc/pillow/asm/mc/mixins.pillow.mc.json'
+//     debug.verbose = true
+//     debug.export = true
+// }
 
 // Example for how to get properties into the manifest for reading at runtime.
 jar {
@@ -207,16 +101,33 @@ jar {
                 "Implementation-Version"  : project.jar.archiveVersion,
                 "Implementation-Vendor"   : "heipiao",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConnector": "net.pillowmc.pillow.asm.PillowConnector",
-                "Premain-Class": "net.pillowmc.pillow.PillowJavaAgent"
+                "MixinConnector": "net.pillowmc.pillow.asm.PillowConnector"
         ])
     }
     // from { configurations.embed.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
+task langproviderJar(type: Jar) {
+    manifest {
+        attributes([
+                "Specification-Title"     : "pillow",
+                "Specification-Vendor"    : "heipiao",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "heipiao",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "FMLModType"              : "LANGPROVIDER"
+        ])
+    }
+    archiveClassifier = 'langprovider'
+    from { sourceSets.langprovider.output }
+}
+
 // Example configuration to allow publishing using the maven-publish plugin
 // This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
+// jar.finalizedBy('reobfJar')
+jar.finalizedBy('langproviderJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 // publish.dependsOn('reobfJar')
 
@@ -224,6 +135,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
+            artifact langproviderJar
         }
     }
     repositories {

@@ -3,44 +3,41 @@ package net.pillowmc.pillow.asm;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.jarhandling.impl.SimpleJarMetadata;
+import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.*;
 import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.impl.FabricLoaderImpl;
-import net.fabricmc.loader.impl.game.GameProvider;
-import net.fabricmc.loader.impl.launch.FabricLauncherBase;
-import net.fabricmc.loader.impl.util.SystemProperties;
-import net.fabricmc.loader.impl.util.log.Log;
-import net.fabricmc.loader.impl.util.log.LogCategory;
 import net.pillowmc.pillow.PillowGameProvider;
 import net.pillowmc.pillow.Utils;
 
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.jetbrains.annotations.NotNull;
+import org.quiltmc.loader.impl.QuiltLoaderImpl;
+import org.quiltmc.loader.impl.game.GameProvider;
+import org.quiltmc.loader.impl.game.minecraft.Log4jLogHandler;
+import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
+import org.quiltmc.loader.impl.util.log.Log;
+import org.quiltmc.loader.impl.util.log.LogCategory;
 import sun.misc.Unsafe;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
-public class PillowTransformationService extends FabricLauncherBase implements ITransformationService {
+public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
     private static final FileSystemProvider UFSP=FileSystemProviders.installed().getFileSystemProvider("union");
     private static final Class<?> UFSPClass=UFSP.getClass();
     private static final Method UFSPCreate;
-    private static Unsafe unsafe;
-    private static long offset;
-    private final Path remapCP = Files.createTempFile("pillowRemapping", ".cp");
+    public static Unsafe unsafe;
+    public static long offset;
     static {
         try {
             UFSPCreate=UFSPClass.getMethod("newFileSystem", BiPredicate.class, Path[].class);
@@ -59,7 +56,7 @@ public class PillowTransformationService extends FabricLauncherBase implements I
         }
     }
 
-    public PillowTransformationService() throws IOException {
+    public PillowTransformationService() {
     }
 
     @Override
@@ -70,50 +67,41 @@ public class PillowTransformationService extends FabricLauncherBase implements I
     @Override
     public void initialize(IEnvironment environment) {
         setupUncaughtExceptionHandler();
-        System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapCP.toString());
-        provider = new PillowGameProvider();
-        provider.locateGame(this, new String[0]);
-        Log.info(LogCategory.GAME_PROVIDER, "Loading %s %s with Fabric Loader %s", provider.getGameName(), provider.getRawGameVersion(), FabricLoaderImpl.VERSION);
-        provider.initialize(this);
-
         try {
-            Files.writeString(this.remapCP, cp.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator)));
-        } catch (IOException e) {
+            Launcher.INSTANCE.environment().findLaunchPlugin("mixin").orElseThrow().offerResource(
+                    Path.of(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()),
+                    "pillow"
+            );
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        FabricLoaderImpl loader = FabricLoaderImpl.INSTANCE;
+        provider = new PillowGameProvider();
+        Log.init(new Log4jLogHandler(), true);
+        provider.locateGame(this, new String[0]);
+        Log.info(LogCategory.GAME_PROVIDER, "Loading %s %s with Quilt Loader %s", provider.getGameName(), provider.getRawGameVersion(), QuiltLoaderImpl.VERSION);
+        provider.initialize(this);
+        QuiltLoaderImpl loader = QuiltLoaderImpl.INSTANCE;
         loader.setGameProvider(provider);
         loader.load();
         loader.freeze();
-        FabricLoaderImpl.INSTANCE.loadAccessWideners();
+        QuiltLoaderImpl.INSTANCE.loadAccessWideners();
     }
 
-    // @Override
-    // public List<Resource> beginScanning(IEnvironment environment) {
-    //     Log.info(LogCategory.DISCOVERY, "Beginning scanning");
-
-    //     try {
-    //         return List.of(new Resource(IModuleLayerManager.Layer.GAME,
-    //                     List.of(SecureJar.from(Path.of(FabricLauncherBase.class.getProtectionDomain().getCodeSource().getLocation().toURI())))
-    //                 ));
-    //     } catch (URISyntaxException e) {
-    //         throw new RuntimeException(e);
-    //     }
-    // }
     @Override
     public List<Resource> completeScan(IModuleLayerManager environment) {
-        Log.info(LogCategory.DISCOVERY, "Beginning scanning with classpath [%s]", cp);
-        List<Path> paths=cp.stream()
-            .filter((path)->!path.getClass().getName().contains("Union"))
-            .collect(Collectors.toUnmodifiableList());
+        Log.info(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
+        if(cp.isEmpty())return List.of();
         return List.of(new Resource(Layer.GAME,
-            List.of(SecureJar.from(PillowTransformationService::createJM, mergePaths(paths)))));
+            List.of(SecureJar.from(sj->PillowTransformationService.createJM(sj, "quiltMods"), cp.toArray(new Path[0])))));
     }
 
-    private static Path mergePaths(List<Path> paths){
+    public static Path mergePaths(List<Path> paths){
+        var old= PillowTransformationService.class.getModule();
         unsafe.putObject(PillowTransformationService.class, offset, UFSPClass.getModule());
         try {
-            return ((FileSystem)UFSPCreate.invoke(UFSP, (BiPredicate<String, String>)(a, b)->true, paths.toArray(new Path[0]))).getRootDirectories().iterator().next();
+            var val = ((FileSystem)UFSPCreate.invoke(UFSP, (BiPredicate<String, String>)(a, b)->true, paths.toArray(new Path[0]))).getRootDirectories().iterator().next();
+            unsafe.putObject(PillowTransformationService.class, offset, old);
+            return val;
         } catch (IllegalAccessException|IllegalArgumentException|InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -125,39 +113,29 @@ public class PillowTransformationService extends FabricLauncherBase implements I
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public @NotNull List<ITransformer> transformers() {
-        return List.of(new EntryPointTransformer(), new AWTransformer());
+        return List.of(Utils.getSide()== EnvType.CLIENT?new ClientEntryPointTransformer():new ServerEntryPointTransformer(), new AWTransformer(), new ModListScreenTransformer(), new RemapModTransformer());
     }
 
-    private static JarMetadata createJM(SecureJar sj){
-        return new SimpleJarMetadata("fabricMod", "1.0.0", sj.getPackages(), sj.getProviders());
+    public static JarMetadata createJM(SecureJar sj, String name){
+        return new SimpleJarMetadata(name, "1.0.0", sj.getPackages(), sj.getProviders());
     }
 
     private GameProvider provider;
     private final List<Path> cp=new ArrayList<>();
 
-    // FabricLauncher start
+    // QuiltLauncher start
 
     @Override
     public void addToClassPath(Path path, String... allowedPrefixes) {
-        // try {
-        //     unsafe.putObject(PillowTransformationService.class, offset, ClassLoader.getSystemClassLoader().getClass().getModule());
-        //     Field f=ClassLoader.getSystemClassLoader().getClass().getSuperclass().getDeclaredField("ucp");
-        //     Object ucp=unsafe.getObject(ClassLoader.getSystemClassLoader(), unsafe.objectFieldOffset(f));
-        //     ucp.getClass().getMethod("addURL", URL.class).invoke(ucp, path.toUri().toURL());
-        // } catch (NoSuchFieldException | NoSuchMethodException | MalformedURLException | IllegalAccessException | InvocationTargetException e) {
-        //     throw new RuntimeException(e);
-        // }
-        cp.add(path);
+        var name=path.getClass().getName();
+        if(!name.contains("Zip")||name.contains("Union"))
+            cp.add(path);
     }
 
     @Override
     public void setAllowedPrefixes(Path path, String... prefixes) {}
-
-    @Override
-    public void setValidParentClassPath(Collection<Path> paths) {
-        // no op
-    }
 
     @Override
     public EnvType getEnvironmentType() {
@@ -195,8 +173,8 @@ public class PillowTransformationService extends FabricLauncherBase implements I
     }
 
     @Override
-    public boolean isDevelopment() {// For remapping mods
-        return true;
+    public boolean isDevelopment() {
+        return false;
     }
 
     @Override
@@ -206,7 +184,7 @@ public class PillowTransformationService extends FabricLauncherBase implements I
 
     @Override
     public String getTargetNamespace() {
-        return "named";
+        return "intermediary"; // Trick Quilt
     }
 
     @Override
