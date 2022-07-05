@@ -12,7 +12,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import org.quiltmc.loader.api.ModContainer;
-import org.spongepowered.asm.mixin.transformer.throwables.MixinPreProcessorException;
 
 public final class ModJarProcessor {
     public static final Set<String> classes=new HashSet<>();
@@ -43,7 +42,6 @@ public final class ModJarProcessor {
                 in.close();
             } catch (IOException e) {
                 // Nothing to do.
-                MixinPreProcessorException
             }
         });
         outJar.putNextEntry(new JarEntry("pack.mcmeta"));
