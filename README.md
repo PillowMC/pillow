@@ -8,19 +8,19 @@
 
 [中文](README.zh_hans.md) | English
 
-## Fabric that runs on Forge
+## Quilt that runs on Forge
 
 _Not implemented yet._
 
-Yes, you can believe it. This mod will make Fabric compatible with Forge.
+Yes, you can believe it. This mod will make Quilt compatible with Forge.
 
-_Don't put Fabric mods in mods directory, put them in fabricMods directory!_
+_Don't put Quilt mods in mods directory, put them in quiltMods directory!_
 
 ## Another mod loader
 
-_Will implement after running Fabric on Forge!_
+_Will implement after running Quilt on Forge!_
 
-It will design mainly for "build bridges" between Forge and Fabric, but it will be a full-usage mod loader. It will not replace Forge or Fabric. It will work well with them.
+It will design mainly for "build bridges" between Forge and Quilt, but it will be a full-usage mod loader. It will not replace Forge or Quilt. It will work well with them.
 
 ## Installing
 
@@ -34,4 +34,4 @@ _Not opened yet._
 
 This project is licensed under [MIT](License.txt).
 
-Fabric loader is licensed under [Apache](License.Fabric.txt).
+Quilt loader is licensed under [Apache](License.Quilt.txt).

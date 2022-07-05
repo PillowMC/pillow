@@ -1,4 +1,5 @@
 # 枕头模组加载器
+_绝非机翻译名_
 
 ![Github stars](https://img.shields.io/github/stars/PillowMC/pillow.svg)
 ![Github forks](https://img.shields.io/github/forks/PillowMC/pillow.svg)
@@ -8,19 +9,19 @@
 
 中文 | [English](README.md)
 
-## 运行在 Forge 上的 Fabric
+## 运行在 Forge 上的 Quilt
 
 _尚未实现_
 
-没错，这个模组会让 Fabric 兼容 Forge 。
+没错，这个模组会让 Quilt 兼容 Forge 。
 
-_不要把 Fabric 模组放到 mods 文件夹，放到 fabricMods 里。_
+_不要把 Quilt 模组放到 mods 文件夹，放到 QuiltMods 里。_
 
 ## 另一个 mod loader
 
-_会在实现运行 Fabric 后开始实现。_
+_会在实现运行 Quilt 后开始实现。_
 
-它的主要是为了在 Forge 和 Fabric 之间“架桥”，但它可能是一个全面使用的模组加载器。它不代替 Forge 或 Fabric，且将很好地与它们合作。
+它的主要是为了在 Forge 和 Quilt 之间“架桥”，但它可能会成为一个广泛使用的模组加载器。它不代替 Forge 或 Quilt，且将很好地与它们合作。
 
 ## 安装
 
@@ -34,4 +35,4 @@ _未开放_
 
 这个项目的许可证是 [MIT](License.txt)。
 
-Fabric 加载器项目的许可证是 [Apache](License.Fabric.txt)。
+Quilt 加载器项目的许可证是 [Apache](License.Quilt.txt)。

@@ -13,6 +13,8 @@ import net.pillowmc.pillow.Utils;
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.jetbrains.annotations.NotNull;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
+import org.quiltmc.loader.impl.filesystem.QuiltJoinedFileSystemProvider;
+import org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider;
 import org.quiltmc.loader.impl.game.GameProvider;
 import org.quiltmc.loader.impl.game.minecraft.Log4jLogHandler;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
@@ -27,6 +29,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -65,8 +68,25 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void initialize(IEnvironment environment) {
         setupUncaughtExceptionHandler();
+        try {
+            var FSPC = FileSystemProvider.class;
+            var old=getClass().getModule();
+            unsafe.putObject(getClass(), offset, FSPC.getModule());
+            var installedProviders = FSPC.getDeclaredField("installedProviders");
+            installedProviders.setAccessible(true);
+            var val=(List<FileSystemProvider>)installedProviders.get(null);
+            var newval = new ArrayList<>(val);
+            newval.removeIf(i->i.getClass().getName().contains("Quilt"));
+            newval.add(new QuiltMemoryFileSystemProvider());
+            newval.add(new QuiltJoinedFileSystemProvider());
+            installedProviders.set(null, Collections.unmodifiableList(newval));
+            unsafe.putObject(getClass(), offset, old);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         try {
             Launcher.INSTANCE.environment().findLaunchPlugin("mixin").orElseThrow().offerResource(
                     Path.of(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()),
@@ -129,9 +149,13 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public void addToClassPath(Path path, String... allowedPrefixes) {
-        var name=path.getClass().getName();
-        if(!name.contains("Zip")||name.contains("Union"))
-            cp.add(path);
+        var name=Utils.extractZipPath(path);
+        try {
+            if(!name.getClass().getName().contains("Union")&&!name.equals(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI())))
+                cp.add(name);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

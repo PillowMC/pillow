@@ -3,7 +3,6 @@ package net.pillowmc.pillow.asm;
 import java.util.ListIterator;
 import java.util.Set;
 
-import org.quiltmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
@@ -11,26 +10,17 @@ import org.objectweb.asm.tree.*;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
-import org.quiltmc.loader.impl.FormattedException;
-import org.quiltmc.loader.impl.entrypoint.EntrypointUtils;
+import net.pillowmc.pillow.Utils;
+
 import org.quiltmc.loader.impl.game.minecraft.Hooks;
 
 public class ClientEntryPointTransformer implements ITransformer<MethodNode> {
-
-    @SuppressWarnings("unused")
-    public static void preLaunch(){
-        try {
-            EntrypointUtils.invoke("preLaunch", PreLaunchEntrypoint.class, PreLaunchEntrypoint::onPreLaunch);
-        } catch (RuntimeException e) {
-            throw new FormattedException("A mod crashed on startup!", e);
-        }
-    }
 
     @Override
     public @NotNull MethodNode transform(MethodNode input, ITransformerVotingContext context) {
         if(input.name.equals("main")){
             var newList=new InsnList();
-            newList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, getClass().getName().replace(".", "/"), "preLaunch", "()V"));
+            newList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Utils.class.getName().replace(".", "/"), "preLaunch", "()V"));
             input.instructions.insertBefore(input.instructions.getFirst(), newList);
             return input;
         }
@@ -62,6 +52,6 @@ public class ClientEntryPointTransformer implements ITransformer<MethodNode> {
     @Override
     public @NotNull Set<Target> targets() {
         return Set.of(Target.targetMethod("net.minecraft.client.Minecraft", "<init>", "(Lnet/minecraft/client/main/GameConfig;)V"),
-                Target.targetMethod("net.minecraft.client.main.Main", "main", "([Ljava/lang/String)V"));
+                Target.targetMethod("net.minecraft.client.main.Main", "main", "([Ljava/lang/String;)V"));
     }
 }

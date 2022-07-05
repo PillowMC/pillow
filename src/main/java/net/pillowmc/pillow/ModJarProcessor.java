@@ -4,16 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
-
 import org.quiltmc.loader.api.ModContainer;
+import org.spongepowered.asm.mixin.transformer.throwables.MixinPreProcessorException;
 
 public final class ModJarProcessor {
     public static final Set<String> classes=new HashSet<>();
@@ -24,25 +23,27 @@ public final class ModJarProcessor {
         var i=modFile.rootPath();
         pathProcesser.apply(i).forEach(j->{
             try {
-                if(!j.toFile().isFile())return;
-                JarFile jar=new JarFile(j.toFile());
-                Enumeration<JarEntry> entries=jar.entries();
-                while(entries.hasMoreElements()){
-                    var next=entries.nextElement();
-                    if(next.getName().startsWith("META-INF/services"))continue;
+                var in=new JarInputStream(j.getFileSystem().provider().newInputStream(j));
+                var next=in.getNextJarEntry();
+                while(next!=null){
+                    if(next.getName().startsWith("META-INF/services")){
+                        next=in.getNextJarEntry();
+                        continue;
+                    }
                     if(next.isDirectory())outJar.putNextEntry(next);
                     else if(!next.getName().endsWith(".class")){
-                        var in=jar.getInputStream(next);
                         outJar.putNextEntry(next);
                         outJar.write(in.readAllBytes());
                     }else{
                         String name=next.getName();
                         classes.add(name.substring(0, name.length()-6).replace("/", "."));
                     }
+                    next=in.getNextJarEntry();
                 }
-                jar.close();
+                in.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // Nothing to do.
+                MixinPreProcessorException
             }
         });
         outJar.putNextEntry(new JarEntry("pack.mcmeta"));
