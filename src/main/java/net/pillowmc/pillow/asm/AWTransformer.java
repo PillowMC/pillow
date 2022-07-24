@@ -14,7 +14,6 @@ import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import net.fabricmc.accesswidener.AccessWidener;
 import net.fabricmc.accesswidener.AccessWidenerClassVisitor;
-import net.fabricmc.mapping.util.AsmRemapperFactory;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 
@@ -24,10 +23,9 @@ public class AWTransformer implements ITransformer<ClassNode> {
     private final Remapper remapperOut;
     AWTransformer(){
         aw=QuiltLoaderImpl.INSTANCE.getAccessWidener();
-        var mappings= QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
-        var factory=new AsmRemapperFactory(mappings);
-        remapperIn=factory.getRemapper("srg", "intermediary");
-        remapperOut=factory.getRemapper("intermediary", "srg");
+        var mappings = QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
+        remapperIn = new NameOnlyRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
+        remapperOut = new NameOnlyRemapper(mappings, PillowNamingContext.toName, PillowNamingContext.fromName);
     }
 
     @Override
@@ -51,8 +49,9 @@ public class AWTransformer implements ITransformer<ClassNode> {
     @Override
     public @NotNull Set<Target> targets() {
         return aw.getTargets().stream()
+            .map(i->i.replace(".", "/"))
             .map(remapperOut::map)
-            .map(name->ITransformer.Target.targetPreClass(name.replace(".", "/")))
+            .map(name->ITransformer.Target.targetPreClass(name.replace('/', '.')))
             .collect(Collectors.toSet());
     }
     

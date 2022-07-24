@@ -35,7 +35,7 @@ public class Utils {
                 .orElseThrow(()->new IllegalStateException("ModLauncher initializes \"ITransformingService\"s without launchTarget! WON'T POSSIBLE!"))
                 .contains("client") ? EnvType.CLIENT : EnvType.SERVER;
     }
-    @SuppressWarnings({"unused", "deprecation"}) // Used by transformed classes.
+    @SuppressWarnings("deprecation") // Used by transformed classes.
     public static void preLaunch(){
         try {
             EntrypointUtils.invoke("pre_launch", org.quiltmc.loader.api.entrypoint.PreLaunchEntrypoint.class, org.quiltmc.loader.api.entrypoint.PreLaunchEntrypoint::onPreLaunch);

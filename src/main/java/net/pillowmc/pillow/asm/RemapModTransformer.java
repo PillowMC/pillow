@@ -3,7 +3,6 @@ package net.pillowmc.pillow.asm;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import net.fabricmc.mapping.util.AsmRemapperFactory;
 import net.pillowmc.pillow.ModJarProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.commons.ClassRemapper;
@@ -18,9 +17,8 @@ import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 public class RemapModTransformer implements ITransformer<ClassNode> {
     private final Remapper remapper;
     RemapModTransformer(){
-        var mappings= QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
-        var factory=new AsmRemapperFactory(mappings);
-        remapper=factory.getRemapper("intermediary", "srg");
+        var mappings = QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
+        remapper=new NameOnlyRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
     }
 
     @Override
@@ -37,7 +35,7 @@ public class RemapModTransformer implements ITransformer<ClassNode> {
 
     @Override
     public @NotNull Set<Target> targets() {
-        return ModJarProcessor.classes.stream().map(Target::targetClass).collect(Collectors.toSet());
+        return ModJarProcessor.classes.stream().map(Target::targetPreClass).collect(Collectors.toSet());
     }
     
 }

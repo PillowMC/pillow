@@ -6,23 +6,23 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
+import cpw.mods.modlauncher.api.INameMappingService.Domain;
 
 public class ModListScreenTransformer implements ITransformer<MethodNode> {
 
     @Override
     public @NotNull MethodNode transform(MethodNode input, ITransformerVotingContext context) {
-        if(input.name.equals("m_5541_")){
+        if(input.name.equals(PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5541_"))){
             input.access=Opcodes.ACC_PUBLIC;
             return input;
         }
         input.instructions.forEach(i->{
             if(i instanceof MethodInsnNode min){
-                if(min.name.equals("m_5542_")){
-                    min.name="m_5541_";
+                if(min.name.equals(PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5542_"))){
+                    min.name=PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5541_");
                 }
             }
         });

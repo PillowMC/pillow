@@ -13,6 +13,8 @@ import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import org.quiltmc.loader.api.ModContainer;
 
+import net.pillowmc.pillow.asm.PillowNamingContext;
+
 public final class ModJarProcessor {
     public static final Set<String> classes=new HashSet<>();
     private ModJarProcessor() {}
@@ -35,7 +37,7 @@ public final class ModJarProcessor {
                         outJar.write(in.readAllBytes());
                     }else{
                         String name=next.getName();
-                        classes.add(name.substring(0, name.length()-6).replace("/", "."));
+                        if(!PillowNamingContext.isUserDev)classes.add(name.substring(0, name.length()-6).replace("/", "."));
                     }
                     next=in.getNextJarEntry();
                 }

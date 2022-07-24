@@ -63,7 +63,7 @@ dependencies {
     implementation "commons-io:commons-io:2.11.0"
 //    implementation "org.spongepowered:mixin:0.8.5"
     implementation "org.jetbrains:annotations:23.0.0"
-    implementation ("org.quiltmc:quilt-loader:0.17.1-beta.5") {
+    implementation ("org.quiltmc:quilt-loader:0.17.1-beta.6") {
 //        exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
     }
@@ -141,6 +141,7 @@ publishing {
     repositories {
         maven {
             url "file://${project.projectDir}/mcmodsrepo"
+            name "currentDir"
         }
     }
 }

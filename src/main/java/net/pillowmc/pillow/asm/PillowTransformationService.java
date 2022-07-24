@@ -9,6 +9,8 @@ import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import net.fabricmc.api.EnvType;
 import net.pillowmc.pillow.PillowGameProvider;
 import net.pillowmc.pillow.Utils;
+import net.pillowmc.pillow.asm.qsl.itemsettings.LivingEntityMixinTransformer;
+import net.pillowmc.pillow.asm.qsl.resourceloader.MinecraftClientMixinTransformer;
 
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.jetbrains.annotations.NotNull;
@@ -135,7 +137,8 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     @Override
     @SuppressWarnings("rawtypes")
     public @NotNull List<ITransformer> transformers() {
-        return List.of(Utils.getSide()== EnvType.CLIENT?new ClientEntryPointTransformer():new ServerEntryPointTransformer(), new AWTransformer(), new ModListScreenTransformer(), new RemapModTransformer());
+        return List.of(Utils.getSide()== EnvType.CLIENT?new ClientEntryPointTransformer():new ServerEntryPointTransformer(), new AWTransformer(), new ModListScreenTransformer(), new RemapModTransformer(), 
+        new MinecraftClientMixinTransformer(), new LivingEntityMixinTransformer());
     }
 
     public static JarMetadata createJM(SecureJar sj, String name){
@@ -151,7 +154,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     public void addToClassPath(Path path, String... allowedPrefixes) {
         var name=Utils.extractZipPath(path);
         try {
-            if(!name.getClass().getName().contains("Union")&&!name.equals(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI())))
+            if(!name.getClass().getName().contains("Union")&&!name.equals(Utils.extractUnionPaths(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI())).get(0)))
                 cp.add(name);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
