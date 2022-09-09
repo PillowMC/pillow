@@ -19,6 +19,6 @@ public final class PillowNamingContext {
             fromName="left";
             toName="right";
         }
-        namingFunction=environment.findNameMapping(environment.getProperty(IEnvironment.Keys.NAMING.get()).orElse("mojang")).orElse((domain, from)->from);
+        namingFunction=environment.findNameMapping("srg").orElse((domain, from)->from);
     }
 }

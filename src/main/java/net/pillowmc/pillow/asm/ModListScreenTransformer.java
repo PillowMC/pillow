@@ -12,17 +12,19 @@ import cpw.mods.modlauncher.api.TransformerVoteResult;
 import cpw.mods.modlauncher.api.INameMappingService.Domain;
 
 public class ModListScreenTransformer implements ITransformer<MethodNode> {
+    private static final String m_5541_ = PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5541_");
+    private static final String m_5542_ = PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5542_");
 
     @Override
     public @NotNull MethodNode transform(MethodNode input, ITransformerVotingContext context) {
-        if(input.name.equals(PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5541_"))){
+        if(input.name.equals(m_5541_)){
             input.access=Opcodes.ACC_PUBLIC;
             return input;
         }
         input.instructions.forEach(i->{
             if(i instanceof MethodInsnNode min){
-                if(min.name.equals(PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5542_"))){
-                    min.name=PillowNamingContext.namingFunction.apply(Domain.METHOD, "m_5541_");
+                if(min.name.equals(m_5542_)){
+                    min.name=m_5541_;
                 }
             }
         });
@@ -37,7 +39,7 @@ public class ModListScreenTransformer implements ITransformer<MethodNode> {
     @Override
     public @NotNull Set<Target> targets() {
         return Set.of(Target.targetMethod("net.minecraftforge.client.gui.ModListScreen", "lambda$updateCache$12", "(Lnet/minecraftforge/forgespi/language/IModInfo;Ljava/lang/String;)Lorg/apache/commons/lang3/tuple/Pair;"),
-        Target.targetMethod("net.minecraftforge.resource.PathResourcePack", "m_5541_", "(Ljava/lang/String;)Ljava/io/InputStream;"));
+        Target.targetMethod("net.minecraftforge.resource.PathResourcePack", m_5541_, "(Ljava/lang/String;)Ljava/io/InputStream;"));
     }
     
 }

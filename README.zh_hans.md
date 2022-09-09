@@ -15,8 +15,6 @@ _尚未实现_
 
 没错，这个模组会让 Quilt 兼容 Forge 。
 
-_不要把 Quilt 模组放到 mods 文件夹，放到 QuiltMods 里。_
-
 ## 另一个 mod loader
 
 _会在实现运行 Quilt 后开始实现。_

@@ -31,9 +31,9 @@ public class PillowConnector implements IMixinConnector {
         try {
             MixinIntermediaryDevRemapper remapper = new MixinIntermediaryDevRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
             MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
-            Log.info(LogCategory.MIXIN, "Loaded Pillow Non-UserDev mappings for mixin remapper!");
+            Log.info(LogCategory.MIXIN, "Loaded Pillow mappings for mixin remapper!");
         } catch (Exception e) {
-            Log.error(LogCategory.MIXIN, "Pillow Non-UserDev environment setup error - the game will probably crash soon!");
+            Log.error(LogCategory.MIXIN, "Pillow environment setup error - the game will probably crash soon!");
             e.printStackTrace();
         }
         QuiltMixinBootstrap.init(QuiltLauncherBase.getLauncher().getEnvironmentType(), QuiltLoaderImpl.INSTANCE);

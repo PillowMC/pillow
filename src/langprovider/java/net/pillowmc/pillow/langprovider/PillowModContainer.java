@@ -1,19 +1,19 @@
 package net.pillowmc.pillow.langprovider;
 
-import net.minecraftforge.fml.ModContainer;
+import org.quiltmc.loader.api.ModContainer;
 import net.minecraftforge.forgespi.language.IModInfo;
 
-public class PillowModContainer extends ModContainer {
-    private final org.quiltmc.loader.api.ModContainer container;
+public class PillowModContainer extends net.minecraftforge.fml.ModContainer {
+    private final ModContainer container;
 
-    public PillowModContainer(IModInfo info, org.quiltmc.loader.api.ModContainer container) {
+    public PillowModContainer(IModInfo info, ModContainer container) {
         super(info);
         this.container=container;
         contextExtension = () -> null;
     }
 
     @Override
-    public boolean matches(Object mod) {
+    public boolean matches(Object mod)   {
         return mod==container;
     }
 

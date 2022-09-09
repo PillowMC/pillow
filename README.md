@@ -14,8 +14,6 @@ _Not implemented yet._
 
 Yes, you can believe it. This mod will make Quilt compatible with Forge.
 
-_Don't put Quilt mods in mods directory, put them in quiltMods directory!_
-
 ## Another mod loader
 
 _Will implement after running Quilt on Forge!_

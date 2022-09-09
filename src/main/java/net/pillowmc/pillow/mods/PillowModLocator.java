@@ -68,25 +68,26 @@ public class PillowModLocator implements IModLocator {
         mods.set("authors", container.metadata().contributors().stream().map(i->i.name()+": "+i.role()).collect(Collectors.joining(", ")));
         mods.set("description", container.metadata().description());
         conf.set("mods", List.of(mods));
+        container.metadata().values();
         var config = new NightConfigWrapper(conf);
         return new ModFileInfo(file, config, List.of());
     }
 
     @Override
     public String name() {
-        return "pillow";
+        return "pillow_quilt";
     }
 
     @Override
     public void scanFile(IModFile file, Consumer<Path> pathConsumer) {
-        Log.debug(PillowLogCategory.SCAN, "Scan started: {}", file);
+        Log.debug(PillowLogCategory.SCAN, "Scan started: %s", file);
         final Function<Path, SecureJar.Status> status = p->file.getSecureJar().verifyPath(p);
         try (Stream<Path> files = Files.find(file.getSecureJar().getRootPath(), Integer.MAX_VALUE, (p, a) -> p.getNameCount() > 0 && p.getFileName().toString().endsWith(".class"))) {
             file.setSecurityStatus(files.peek(pathConsumer).map(status).reduce((s1, s2)-> SecureJar.Status.values()[Math.min(s1.ordinal(), s2.ordinal())]).orElse(SecureJar.Status.INVALID));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.debug(PillowLogCategory.SCAN, "Scan finished: {}", file);
+        Log.debug(PillowLogCategory.SCAN, "Scan finished: %s", file);
     }
 
     @Override

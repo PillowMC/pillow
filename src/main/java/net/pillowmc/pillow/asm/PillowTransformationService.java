@@ -15,6 +15,7 @@ import net.pillowmc.pillow.asm.qsl.resourceloader.MinecraftClientMixinTransforme
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.jetbrains.annotations.NotNull;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
+import org.quiltmc.loader.impl.filesystem.DelegatingUrlStreamHandlerFactory;
 import org.quiltmc.loader.impl.filesystem.QuiltJoinedFileSystemProvider;
 import org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider;
 import org.quiltmc.loader.impl.game.GameProvider;
@@ -29,6 +30,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -73,6 +76,21 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     @SuppressWarnings("unchecked")
     public void initialize(IEnvironment environment) {
         setupUncaughtExceptionHandler();
+        // Don't touch here
+        try {
+            var old=getClass().getModule();
+            unsafe.putObject(getClass(), offset, URL.class.getModule());
+            var field=URL.class.getDeclaredField("factory");
+            field.setAccessible(true);
+            var oldFactory=(URLStreamHandlerFactory) field.get(null);
+            field.set(null, null);
+            DelegatingUrlStreamHandlerFactory.appendFactory(oldFactory);
+            field.set(null, DelegatingUrlStreamHandlerFactory.INSTANCE);
+            unsafe.putObject(getClass(), offset, old);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+        // End of don't touch here
         try {
             var FSPC = FileSystemProvider.class;
             var old=getClass().getModule();

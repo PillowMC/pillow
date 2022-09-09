@@ -1,8 +1,6 @@
 buildscript {
     repositories {
         // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = "https://repo.spongepowered.org/maven" }
         mavenCentral()
     }
     dependencies {
@@ -14,14 +12,14 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'maven-publish'
-    id 'java'
+    id 'java-library'
 }
 // apply plugin: 'net.minecraftforge.gradle'
 // apply plugin: 'org.spongepowered.mixin'
 
 
 version = "1.0"
-group = 'net.pillowmc.pillow' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'net.pillowmc' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'pillow'
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
@@ -33,6 +31,10 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 //     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 // }
 
+java {
+    withSourcesJar()
+}
+
 sourceSets {
     langprovider{
         compileClasspath += sourceSets.main.compileClasspath
@@ -42,7 +44,10 @@ sourceSets {
 
 repositories {
     maven { url = 'https://lss233.littleservice.cn/repositories/minecraft' }
-    maven { url = 'https://maven.minecraftforge.net' }
+    maven {
+        name = 'Forge Developement LLC'
+        url = 'https://maven.minecraftforge.net'
+    }
     maven {
         name = 'QuiltMC'
         url = 'https://maven.quiltmc.org/repository/release/'
@@ -58,21 +63,24 @@ dependencies {
     // minecraft 'net.minecraftforge:forge:1.18.2-40.1.25'
     implementation 'net.minecraftforge:fmlloader:1.18.2-40.1.25'
     implementation 'net.minecraftforge:fmlcore:1.18.2-40.1.25'
+    implementation 'net.minecraftforge:forgespi:5.0.3'
     implementation "cpw.mods:modlauncher:10.0.1"
     implementation "cpw.mods:securejarhandler:1.0.5"
     implementation "commons-io:commons-io:2.11.0"
 //    implementation "org.spongepowered:mixin:0.8.5"
     implementation "org.jetbrains:annotations:23.0.0"
-    implementation ("org.quiltmc:quilt-loader:0.17.1-beta.6") {
+    api "net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5"
+    api ("org.quiltmc:quilt-loader:0.17.5-beta.1") {
 //        exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
     }
-    implementation "net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5"
-    implementation "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
-    implementation ("net.fabricmc:tiny-remapper:0.8.2") {
+    api "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
+    api ("net.fabricmc:tiny-remapper:0.8.6") {
         exclude group: "org.ow2.asm"
     }
-    implementation "net.fabricmc:access-widener:2.1.0"
+    api "net.fabricmc:access-widener:2.1.0"
+    api "org.quiltmc:quilt-json5:1.0.1"
+    api "org.quiltmc:quilt-config:1.0.0-beta.6"
 //    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 processResources {
@@ -117,11 +125,17 @@ task langproviderJar(type: Jar) {
                 "Implementation-Version"  : project.jar.archiveVersion,
                 "Implementation-Vendor"   : "heipiao",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "FMLModType"              : "LANGPROVIDER"
+                "FMLModType"              : "LANGPROVIDER",
+                "Automatic-Module-Name"   : "pillowlp"
         ])
     }
     archiveClassifier = 'langprovider'
     from { sourceSets.langprovider.output }
+}
+
+// getTasks().findByName("build").dependsOn('langproviderSourcesJar')
+sourcesJar {
+    from sourceSets.langprovider.allSource
 }
 
 // Example configuration to allow publishing using the maven-publish plugin
@@ -136,13 +150,23 @@ publishing {
         mavenJava(MavenPublication) {
             artifact jar
             artifact langproviderJar
+            artifact sourcesJar
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                configurations.api.allDependencies.each {
+                    if (it.group != null && it.name != null) {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
         }
     }
     repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-            name "currentDir"
-        }
+        mavenLocal()
     }
 }
 
