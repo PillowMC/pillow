@@ -6,7 +6,7 @@
         "version": "${version}",
         "metadata": {
             "name": "Pillow Mod Loader",
-            "description": "The mod-loader that cares and works on Forge.",
+            "description": "The mod-loader that works on Forge.",
             "contributors": {
                 "PillowMC": "Owner",
                 "QuiltMC (credits only)": "Quilt Owner"
@@ -22,16 +22,6 @@
             "license": "MIT",
             "icon": "assets/pillow/icon.png"
         },
-        "intermediate_mappings": "net.fabricmc:intermediary",
-        "provides": [
-            {
-                "id": "fabricloader",
-                "version": "0.14.8"
-            },
-            {
-                "id": "quilt_loader",
-                "version": "0.17.1-beta.5"
-            }
-        ]
+        "intermediate_mappings": "net.fabricmc:intermediary"
     }
 }

@@ -24,8 +24,8 @@ public class AWTransformer implements ITransformer<ClassNode> {
     AWTransformer(){
         aw=QuiltLoaderImpl.INSTANCE.getAccessWidener();
         var mappings = QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
-        remapperIn = new NameOnlyRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
-        remapperOut = new NameOnlyRemapper(mappings, PillowNamingContext.toName, PillowNamingContext.fromName);
+        remapperIn = RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
+        remapperOut = RemapperUtils.create(mappings, PillowNamingContext.toName, PillowNamingContext.fromName);
     }
 
     @Override

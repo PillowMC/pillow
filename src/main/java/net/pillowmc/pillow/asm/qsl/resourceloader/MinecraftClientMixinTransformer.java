@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.ParameterNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -73,11 +69,9 @@ public class MinecraftClientMixinTransformer implements ITransformer<ClassNode> 
                 }
                 i.localVariables.add(1, new LocalVariableNode("a", "Ljava/lang/String;", null, start, end, 1));
                 i.localVariables.add(2, new LocalVariableNode("b", "I", null, start, end, 2));
-                var insns=i.instructions.iterator();
-                while(insns.hasNext()){
-                    var insn=insns.next();
-                    if(insn instanceof VarInsnNode vinsn&&vinsn.var>=1){
-                        vinsn.var=3;
+                for (AbstractInsnNode insn : i.instructions) {
+                    if (insn instanceof VarInsnNode vinsn && vinsn.var >= 1) {
+                        vinsn.var = 3;
                     }
                 }
             }else if(i.name.equals("onEndReloadResources")){

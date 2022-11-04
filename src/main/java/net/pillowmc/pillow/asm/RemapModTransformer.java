@@ -18,7 +18,7 @@ public class RemapModTransformer implements ITransformer<ClassNode> {
     private final Remapper remapper;
     RemapModTransformer(){
         var mappings = QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
-        remapper=new NameOnlyRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
+        remapper=RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
     }
 
     @Override

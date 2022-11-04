@@ -1,7 +1,5 @@
 package net.pillowmc.pillow;
 
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.IEnvironment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModDependency;
@@ -36,7 +34,7 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public String getRawGameVersion() {
-        return "1.18.2";
+        return FMLLoader.versionInfo().mcVersion();
     }
 
     @Override
@@ -47,7 +45,8 @@ public class PillowGameProvider implements GameProvider {
     @Override
     public Collection<BuiltinMod> getBuiltinMods() {
         BuiltinModMetadata.Builder minecraftMetadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
-                .setName(getGameName());
+                .setName(getGameName())
+                .setDescription("Obfuscated as Searge name, MCP version = %s".formatted(FMLLoader.versionInfo().mcpVersion()));
         try {
             minecraftMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, "java", List.of(String.format(">=%d", 17))));
         } catch (VersionParsingException e) {
@@ -81,8 +80,7 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public Path getLaunchDirectory() {
-        return Launcher.INSTANCE.environment()
-                .getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Path.of("."));
+        return FMLLoader.getGamePath();
     }
 
     @Override

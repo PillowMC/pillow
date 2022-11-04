@@ -219,7 +219,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public boolean isDevelopment() {
-        return false;
+        return Thread.currentThread().getStackTrace()[2].getClassName().contains("ClasspathModCandidateFinder");
     }
 
     @Override
