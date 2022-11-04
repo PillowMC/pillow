@@ -14,8 +14,8 @@ on:
     branches: [ dev ]
 
 permissions:
-  contents: read
   packages: write
+  contents: read
 
 jobs:
   build:
