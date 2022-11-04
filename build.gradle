@@ -55,7 +55,7 @@ repositories {
     }
     maven {
         name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/PillowMC/pillow")
+        url = uri("https://maven.pkg.github.com/PillowMC/PillowMC")
     }
 }
 
