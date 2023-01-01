@@ -80,7 +80,7 @@ dependencies {
     implementation "org.jetbrains:annotations:23.0.0"
     api "net.pillowmc:pillow-remapper:0.1-SNAPSHOT"
     api "net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5"
-    api ("org.quiltmc:quilt-loader:0.17.5-beta.2") {
+    api ("org.quiltmc:quilt-loader:0.18.1-beta.8") {
 //        exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
     }
@@ -186,7 +186,7 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/PillowMC/PillowMC")
             credentials {
-//                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }

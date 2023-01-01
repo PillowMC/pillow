@@ -1,15 +1,13 @@
 package net.pillowmc.pillow;
 
 import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.VersionParsingException;
-import net.fabricmc.loader.api.metadata.ModDependency;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLServiceProvider;
+import org.quiltmc.loader.api.Version;
 import org.quiltmc.loader.impl.entrypoint.GameTransformer;
 import org.quiltmc.loader.impl.game.GameProvider;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncher;
-import org.quiltmc.loader.impl.metadata.BuiltinModMetadata;
-import org.quiltmc.loader.impl.metadata.ModDependencyImpl;
+import org.quiltmc.loader.impl.metadata.qmj.V1ModMetadataBuilder;
 import org.quiltmc.loader.impl.util.Arguments;
 
 import java.net.URISyntaxException;
@@ -44,21 +42,15 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public Collection<BuiltinMod> getBuiltinMods() {
-        BuiltinModMetadata.Builder minecraftMetadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
-                .setName(getGameName())
-                .setDescription("Obfuscated as Searge name, MCP version = %s".formatted(FMLLoader.versionInfo().mcpVersion()));
-        try {
-            minecraftMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, "java", List.of(String.format(">=%d", 17))));
-        } catch (VersionParsingException e) {
-            throw new RuntimeException(e);
-        }
-        BuiltinModMetadata.Builder forgeMetadata = new BuiltinModMetadata.Builder("forge", FMLLoader.versionInfo().forgeVersion())
-                .setName("forge");
-        try {
-            forgeMetadata.addDependency(new ModDependencyImpl(ModDependency.Kind.DEPENDS, getGameId(), List.of(String.format("=%s", getRawGameVersion()))));
-        } catch (VersionParsingException e) {
-            throw new RuntimeException(e);
-        }
+        V1ModMetadataBuilder minecraftMetadata = new V1ModMetadataBuilder();
+        minecraftMetadata.id = getGameId();
+        minecraftMetadata.version = Version.of(getRawGameVersion());
+        minecraftMetadata.name = getGameName();
+        minecraftMetadata.description = "Obfuscated as Searge name, MCP version = %s".formatted(FMLLoader.versionInfo().mcpVersion());
+        V1ModMetadataBuilder forgeMetadata = new V1ModMetadataBuilder();
+        forgeMetadata.id = "forge";
+        forgeMetadata.version = Version.of(FMLLoader.versionInfo().forgeVersion());
+        forgeMetadata.group = FMLLoader.versionInfo().forgeGroup();
         try {
             var path=FMLServiceProvider.class.getProtectionDomain().getCodeSource().getLocation().toURI();
             return Arrays.asList(new BuiltinMod(List.of(Paths.get(path)), minecraftMetadata.build()),
@@ -71,7 +63,7 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public String getEntrypoint() {
-        if(Utils.getSide()== EnvType.CLIENT){
+        if(Utils.getSide() == EnvType.CLIENT){
             return "net.minecraft.client.main.Main";
         }else{
             return "net.minecraft.server.Main";

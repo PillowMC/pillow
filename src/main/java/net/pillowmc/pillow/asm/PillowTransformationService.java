@@ -1,16 +1,22 @@
 package net.pillowmc.pillow.asm;
 
-import cpw.mods.jarhandling.JarMetadata;
-import cpw.mods.jarhandling.SecureJar;
-import cpw.mods.jarhandling.impl.SimpleJarMetadata;
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.*;
-import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
-import net.fabricmc.api.EnvType;
-import net.pillowmc.pillow.PillowGameProvider;
-import net.pillowmc.pillow.Utils;
-import net.pillowmc.pillow.asm.qsl.itemsettings.LivingEntityMixinTransformer;
-import net.pillowmc.pillow.asm.qsl.resourceloader.MinecraftClientMixinTransformer;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
+import java.nio.file.FileSystem;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.spi.FileSystemProvider;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.jar.Manifest;
 
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.jetbrains.annotations.NotNull;
@@ -23,22 +29,22 @@ import org.quiltmc.loader.impl.game.minecraft.Log4jLogHandler;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.util.log.Log;
 import org.quiltmc.loader.impl.util.log.LogCategory;
-import sun.misc.Unsafe;
 
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLStreamHandlerFactory;
-import java.nio.file.FileSystem;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.spi.FileSystemProvider;
-import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.jar.Manifest;
+import cpw.mods.jarhandling.JarMetadata;
+import cpw.mods.jarhandling.SecureJar;
+import cpw.mods.jarhandling.impl.SimpleJarMetadata;
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.IEnvironment;
+import cpw.mods.modlauncher.api.IModuleLayerManager;
+import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
+import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformer;
+import net.fabricmc.api.EnvType;
+import net.pillowmc.pillow.PillowGameProvider;
+import net.pillowmc.pillow.Utils;
+import net.pillowmc.pillow.asm.qsl.itemsettings.LivingEntityMixinTransformer;
+import net.pillowmc.pillow.asm.qsl.resourceloader.MinecraftClientMixinTransformer;
+import sun.misc.Unsafe;
 
 public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
     private static final FileSystemProvider UFSP=FileSystemProviders.installed().getFileSystemProvider("union");
@@ -129,10 +135,10 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public List<Resource> completeScan(IModuleLayerManager environment) {
-        Log.info(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
+        Log.debug(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
         if(cp.isEmpty())return List.of();
         return List.of(new Resource(Layer.GAME,
-            List.of(SecureJar.from(sj->PillowTransformationService.createJM(sj, "quiltMods"), cp.toArray(new Path[0])))));
+            List.of(SecureJar.from(sj->PillowTransformationService.createJarMetadata(sj, "quiltMods"), cp.toArray(new Path[0])))));
     }
 
     public static Path mergePaths(List<Path> paths){
@@ -155,11 +161,11 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     @Override
     @SuppressWarnings("rawtypes")
     public @NotNull List<ITransformer> transformers() {
-        return List.of(Utils.getSide()== EnvType.CLIENT?new ClientEntryPointTransformer():new ServerEntryPointTransformer(), new AWTransformer(), new ModListScreenTransformer(), new RemapModTransformer(), 
+        return List.of(Utils.getSide()== EnvType.CLIENT?new ClientEntryPointTransformer():new ServerEntryPointTransformer(), new AWTransformer(), new ModListScreenTransformer(), new RemapModTransformer(),
         new MinecraftClientMixinTransformer(), new LivingEntityMixinTransformer());
     }
 
-    public static JarMetadata createJM(SecureJar sj, String name){
+    public static JarMetadata createJarMetadata(SecureJar sj, String name){
         return new SimpleJarMetadata(name, "1.0.0", sj.getPackages(), sj.getProviders());
     }
 

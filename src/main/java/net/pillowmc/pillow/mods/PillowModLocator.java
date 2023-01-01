@@ -9,13 +9,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.api.ModLicense;
+import org.quiltmc.loader.api.QuiltLoader;
 import org.quiltmc.loader.impl.util.log.Log;
+
 import com.electronwill.nightconfig.core.Config;
 
 import cpw.mods.jarhandling.SecureJar;
-import org.quiltmc.loader.api.QuiltLoader;
-import org.quiltmc.loader.api.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.NightConfigWrapper;
@@ -65,7 +67,7 @@ public class PillowModLocator implements IModLocator {
         var icon=container.metadata().icon(16);
         mods.set("logoFile", icon);
         mods.set("logoBlur", false);
-        mods.set("authors", container.metadata().contributors().stream().map(i->i.name()+": "+i.role()).collect(Collectors.joining(", ")));
+        mods.set("authors", container.metadata().contributors().stream().map(i->i.name()+": ".concat(String.join(", ", i.roles()))).collect(Collectors.joining(", ")));
         mods.set("description", container.metadata().description());
         conf.set("mods", List.of(mods));
         container.metadata().values();
@@ -75,7 +77,7 @@ public class PillowModLocator implements IModLocator {
 
     @Override
     public String name() {
-        return "pillow_quilt";
+        return "pillow";
     }
 
     @Override
@@ -98,5 +100,5 @@ public class PillowModLocator implements IModLocator {
     public boolean isValid(IModFile modFile) {
         return true;
     }
-    
+
 }
