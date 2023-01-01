@@ -32,7 +32,7 @@ jobs:
         arguments: build publish
       env:
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        USERNAME: heipiao233
+        USERNAME: ${{ github.actor }}
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.0.0
       with:

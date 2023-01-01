@@ -186,7 +186,7 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/PillowMC/PillowMC")
             credentials {
-                username = "heipiao233"
+                username = USERNAME
                 password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
             }
         }
