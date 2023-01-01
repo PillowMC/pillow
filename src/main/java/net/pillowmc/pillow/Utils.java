@@ -4,12 +4,12 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.List;
 
-import net.minecraftforge.fml.loading.FMLLoader;
 import org.quiltmc.loader.impl.FormattedException;
 import org.quiltmc.loader.impl.entrypoint.EntrypointUtils;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
+import net.minecraftforge.fml.loading.FMLLoader;
 import sun.misc.Unsafe;
 
 public class Utils {
