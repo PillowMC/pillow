@@ -184,7 +184,7 @@ publishing {
         mavenLocal()
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/PillowMC/PillowMC")
+            url = uri("https://maven.pkg.github.com/PillowMC/pillow")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
