@@ -44,7 +44,6 @@ sourceSets {
 
 repositories {
     mavenLocal()
-    maven { url = 'https://lss233.littleservice.cn/repositories/minecraft' }
     maven {
         name = 'Forge Developement LLC'
         url = 'https://maven.minecraftforge.net'
@@ -57,8 +56,8 @@ repositories {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/PillowMC/PillowMC")
         credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
         }
     }
 }
@@ -80,7 +79,7 @@ dependencies {
     implementation "org.jetbrains:annotations:23.0.0"
     api "net.pillowmc:pillow-remapper:0.1-SNAPSHOT"
     api "net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5"
-    api ("org.quiltmc:quilt-loader:0.18.1-beta.8") {
+    api ("org.quiltmc:quilt-loader:0.19.0-beta.13") {
 //        exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
     }
