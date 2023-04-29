@@ -49,6 +49,10 @@ repositories {
         url = 'https://maven.minecraftforge.net'
     }
     maven {
+        name = 'FabricMC'
+        url = 'https://maven.fabricmc.net/'
+    }
+    maven {
         name = 'QuiltMC'
         url = 'https://maven.quiltmc.org/repository/release/'
     }
