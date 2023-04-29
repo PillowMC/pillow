@@ -49,8 +49,12 @@ repositories {
         url = 'https://maven.fabricmc.net/'
     }
     maven {
-        name = 'QuiltMC'
+        name = 'QuiltMC Release'
         url = 'https://maven.quiltmc.org/repository/release/'
+    }
+    maven {
+        name = 'QuiltMC Snapshot'
+        url = 'https://maven.quiltmc.org/repository/snapshot/'
     }
     maven {
         name = 'Forge Developement LLC'
@@ -82,7 +86,7 @@ dependencies {
 //    implementation "org.spongepowered:mixin:0.8.5"
     implementation "org.jetbrains:annotations:23.0.0"
     api "net.pillowmc:pillow-remapper:0.1-SNAPSHOT"
-    api "net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5"
+    api "net.fabricmc:sponge-mixin:0.12.4+mixin.0.8.5"
     api ("org.quiltmc:quilt-loader:0.19.0-beta.13") {
 //        exclude module: "sponge-mixin"
         exclude group: "org.ow2.asm"
@@ -92,8 +96,10 @@ dependencies {
         exclude group: "org.ow2.asm"
     }
     api "net.fabricmc:access-widener:2.1.0"
-    api "org.quiltmc:quilt-json5:1.0.1"
+    api "org.quiltmc:quilt-json5:1.0.2"
     api "org.quiltmc:quilt-config:1.0.0-beta.6"
+    compileOnly "org.quiltmc.chasm:chasm:0.1.0-20230126.045734-27"
+	compileOnly "org.quiltmc.chasm:chassembly:0.1.0-20230126.045734-27"
 //    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 processResources {
