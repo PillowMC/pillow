@@ -45,16 +45,16 @@ sourceSets {
 repositories {
     mavenLocal()
     maven {
-        name = 'Forge Developement LLC'
-        url = 'https://maven.minecraftforge.net'
-    }
-    maven {
         name = 'FabricMC'
         url = 'https://maven.fabricmc.net/'
     }
     maven {
         name = 'QuiltMC'
         url = 'https://maven.quiltmc.org/repository/release/'
+    }
+    maven {
+        name = 'Forge Developement LLC'
+        url = 'https://maven.minecraftforge.net'
     }
     maven {
         name = "GitHubPackages"
