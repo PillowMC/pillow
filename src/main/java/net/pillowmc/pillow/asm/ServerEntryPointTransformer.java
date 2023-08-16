@@ -1,17 +1,22 @@
 package net.pillowmc.pillow.asm;
 
+import java.util.ListIterator;
+import java.util.Set;
+
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.quiltmc.loader.impl.game.minecraft.Hooks;
+
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import net.pillowmc.pillow.Utils;
-
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.*;
-import org.quiltmc.loader.impl.game.minecraft.Hooks;
-
-import java.util.ListIterator;
-import java.util.Set;
 
 public class ServerEntryPointTransformer implements ITransformer<MethodNode> {
 

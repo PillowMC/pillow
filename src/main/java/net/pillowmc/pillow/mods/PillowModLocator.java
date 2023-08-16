@@ -1,6 +1,7 @@
 package net.pillowmc.pillow.mods;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -21,6 +22,7 @@ import cpw.mods.jarhandling.SecureJar;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.NightConfigWrapper;
+import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.pillowmc.pillow.ModJarProcessor;
@@ -31,11 +33,12 @@ public class PillowModLocator implements IModLocator {
     private final String QUILT_VERSION =QuiltLoader.getModContainer("quilt_loader").orElseThrow().metadata().version().raw();
 
     @Override
-    public List<IModFile> scanMods() {
+    public List<ModFileOrException> scanMods() {
         return QuiltLoader.getAllMods().stream()
             .filter(mod->!mod.metadata().id().equals("minecraft"))
             .filter(mod->!mod.metadata().id().equals("forge"))
             .map(this::createModFile)
+            .map((v) -> new ModFileOrException(v, null))
             .collect(Collectors.toList());
     }
 
@@ -72,7 +75,17 @@ public class PillowModLocator implements IModLocator {
         conf.set("mods", List.of(mods));
         container.metadata().values();
         var config = new NightConfigWrapper(conf);
-        return new ModFileInfo(file, config, List.of());
+        return new ModFileInfo(file, config, (modFile) -> this.configSetFile(config, modFile), List.of());
+    }
+
+    private void configSetFile(NightConfigWrapper config, IModFileInfo file) {
+        try {
+            var method = config.getClass().getDeclaredMethod("setFile", IModFileInfo.class);
+            method.setAccessible(true);
+            method.invoke(config, file);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

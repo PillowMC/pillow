@@ -8,18 +8,11 @@
 
 [中文](README.zh_hans.md) | English
 
-## Quilt that runs on Forge
+## Quilt that runs on ModLauncher with NeoForge
 
 _Not implemented yet._
 
-Yes, you can believe it. This mod will make Quilt compatible with Forge.
-
-## Another mod loader
-
-_Will implement after running Quilt on Forge!_
-
-It will design mainly for "build bridges" between Forge and Quilt, but it will be a full-usage mod loader. It will not replace Forge or Quilt. It will work well with them.
-
+Yes, you can believe it. This mod will make Quilt and NeoForge run on ModLauncher *at the same time*.
 ## Installing
 
 _Not developed yet._
@@ -33,3 +26,5 @@ _Not opened yet._
 This project is licensed under [MIT](License.txt).
 
 Quilt loader is licensed under [Apache](License.Quilt.txt).
+
+NeoForge is licensed under [LGPL 2.1](License.NeoForge.txt).

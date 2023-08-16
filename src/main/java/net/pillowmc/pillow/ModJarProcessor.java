@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
+
 import org.quiltmc.loader.api.ModContainer;
 
 import net.pillowmc.pillow.asm.PillowNamingContext;

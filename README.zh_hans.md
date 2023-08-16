@@ -9,17 +9,11 @@ _绝非机翻译名_
 
 中文 | [English](README.md)
 
-## 运行在 Forge 上的 Quilt
+## 运行在 ModLauncher 上的 Quilt 和 NeoForge
 
 _尚未实现_
 
-没错，这个模组会让 Quilt 兼容 Forge 。
-
-## 另一个模组加载器
-
-_会在实现运行 Quilt 后开始实现。_
-
-它的主要是为了在 Forge 和 Quilt 之间“架桥”，但它可能会成为一个广泛使用的模组加载器。它不代替 Forge 或 Quilt，且将很好地与它们合作。
+没错，这个模组会让 Quilt 和 NeoForge *同时* 在 ModLauncher 上运行。
 
 ## 安装
 
@@ -34,3 +28,5 @@ _未开放_
 这个项目的许可证是 [MIT](License.txt)。
 
 Quilt 加载器项目的许可证是 [Apache](License.Quilt.txt)。
+
+NeoForge 项目的许可证是 [LGPL 2.1](License.NeoForge.txt)。

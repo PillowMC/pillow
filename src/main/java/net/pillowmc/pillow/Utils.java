@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.quiltmc.loader.impl.FormattedException;
 import org.quiltmc.loader.impl.entrypoint.EntrypointUtils;
+import org.quiltmc.loader.impl.filesystem.QuiltZipFileSystem;
+import org.quiltmc.loader.impl.filesystem.QuiltZipPath;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
@@ -46,8 +48,7 @@ public class Utils {
     public static List<Path> extractUnionPaths(Path path) {
         if(path.getClass().getName().contains("Union")){
             var pc=path.getClass();
-            var old=Utils.class.getModule();
-            unsafe.putObject(Utils.class, offset, pc.getModule());
+            var old=setModule(pc.getModule(), Utils.class);
             try {
                 var fsf=pc.getDeclaredField("fileSystem");
                 fsf.setAccessible(true);
@@ -55,7 +56,7 @@ public class Utils {
                 var fsc=fs.getClass();
                 var bpf=fsc.getDeclaredField("basepaths");
                 bpf.setAccessible(true);
-                unsafe.putObject(Utils.class, offset, old);
+                setModule(old, Utils.class);
                 return (List<Path>)bpf.get(fs);
             } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
                 throw new RuntimeException(e);
@@ -65,23 +66,28 @@ public class Utils {
     }
 
     public static Path extractZipPath(Path path) {
-        if(path.getClass().getName().contains("Zip")){
-            var pc=path.getClass();
-            var old= Utils.class.getModule();
-            unsafe.putObject(Utils.class, offset, pc.getModule());
+        if (path instanceof QuiltZipPath zp) {
+            var fs = zp.getFileSystem();
+            var fsc = QuiltZipFileSystem.class;
+            // var old=setModule(fsc.getModule(), Utils.class);
             try {
-                var zfsf=pc.getDeclaredField("zfs");
-                zfsf.setAccessible(true);
-                var zfs=zfsf.get(path);
-                var zfsc=zfs.getClass();
-                var zfpf=zfsc.getDeclaredField("zfpath");
-                zfpf.setAccessible(true);
-                unsafe.putObject(Utils.class, offset, old);
-                return (Path)zfpf.get(zfs);
+                var channelsField=fsc.getDeclaredField("channels");
+                channelsField.setAccessible(true);
+                var channels=channelsField.get(fs);
+                var channelClass=channels.getClass();
+                var zipFromField=channelClass.getDeclaredField("zipFrom");
+                zipFromField.setAccessible(true);
+                return (Path)zipFromField.get(channels);
             } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
                 throw new RuntimeException(e);
             }
         }
         return path;
+    }
+
+    public static Module setModule(Module new_, Class<?> class_) {
+        var old = class_.getModule();
+        unsafe.putObject(class_, offset, new_);
+        return old;
     }
 }
