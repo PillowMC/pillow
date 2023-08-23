@@ -5,17 +5,16 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.tree.ClassNode;
+import org.quiltmc.loader.impl.QuiltLoaderImpl;
+import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import net.fabricmc.accesswidener.AccessWidener;
 import net.fabricmc.accesswidener.AccessWidenerClassVisitor;
-import org.quiltmc.loader.impl.QuiltLoaderImpl;
-import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 
 public class AWTransformer implements ITransformer<ClassNode> {
     private final AccessWidener aw;
@@ -24,19 +23,19 @@ public class AWTransformer implements ITransformer<ClassNode> {
     AWTransformer(){
         aw=QuiltLoaderImpl.INSTANCE.getAccessWidener();
         var mappings = QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
-        remapperIn = RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
-        remapperOut = RemapperUtils.create(mappings, PillowNamingContext.toName, PillowNamingContext.fromName);
+        remapperOut = RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
+        remapperIn = RemapperUtils.create(mappings, PillowNamingContext.toName, PillowNamingContext.fromName);
     }
 
     @Override
     public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context) {
         ClassNode output=new ClassNode(QuiltLoaderImpl.ASM_VERSION);
-        ClassVisitor remapOut=new ClassRemapper(output, remapperOut);
+        ClassVisitor remapOut=new PillowClassRemapper(output, remapperOut);
         ClassVisitor visitor=AccessWidenerClassVisitor.createClassVisitor(QuiltLoaderImpl.ASM_VERSION, remapOut,
             QuiltLoaderImpl.INSTANCE.getAccessWidener()
         );
         
-        ClassVisitor remapIn=new ClassRemapper(visitor, remapperIn);
+        ClassVisitor remapIn=new PillowClassRemapper(visitor, remapperIn);
         input.accept(remapIn);
         return output;
     }

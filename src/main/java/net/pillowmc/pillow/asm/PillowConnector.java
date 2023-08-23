@@ -20,7 +20,7 @@ public class PillowConnector implements IMixinConnector {
         if(mods==null)return; // No Quilt/Pillow Mod installed.
         var pillow=getClass().getModule();
         PillowTransformationService.unsafe.putObject(getClass(), PillowTransformationService.offset, mods);
-        var loader=manager.getLayer(Layer.BOOT).orElseThrow().findModule(PillowNamingContext.isUserDev?"quilt.loader.beta._2":"quilt.loader").orElseThrow();
+        var loader=manager.getLayer(Layer.BOOT).orElseThrow().findModule(PillowNamingContext.isUserDev?"org.quiltmc.loader.beta._2":"org.quiltmc.loader").orElseThrow();
         mods.addReads(loader);
         PillowTransformationService.unsafe.putObject(getClass(), PillowTransformationService.offset, loader);
         loader.addReads(mods);

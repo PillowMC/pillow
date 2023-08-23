@@ -19,8 +19,5 @@ build
 
 # other
 eclipse
-run
+run*
 .vscode
-
-# Files from Forge MDK
-forge*changelog.txt

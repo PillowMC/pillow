@@ -28,6 +28,7 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import net.pillowmc.pillow.ModJarProcessor;
 import net.pillowmc.pillow.PillowLogCategory;
 import net.pillowmc.pillow.Utils;
+import net.pillowmc.pillow.asm.PillowTransformationService;
 
 public class PillowModLocator implements IModLocator {
     private final String QUILT_VERSION =QuiltLoader.getModContainer("quilt_loader").orElseThrow().metadata().version().raw();
@@ -35,8 +36,7 @@ public class PillowModLocator implements IModLocator {
     @Override
     public List<ModFileOrException> scanMods() {
         return QuiltLoader.getAllMods().stream()
-            .filter(mod->!mod.metadata().id().equals("minecraft"))
-            .filter(mod->!mod.metadata().id().equals("forge"))
+            .filter(mod->!PillowTransformationService.NO_LOAD_MODS.contains(mod.metadata().id()))
             .map(this::createModFile)
             .map((v) -> new ModFileOrException(v, null))
             .collect(Collectors.toList());

@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.tree.ClassNode;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
@@ -25,7 +24,7 @@ public class RemapModTransformer implements ITransformer<ClassNode> {
     @Override
     public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context) {
         ClassNode output = new ClassNode();
-        input.accept(new ClassRemapper(output, remapper));
+        input.accept(new PillowClassRemapper(output, remapper));
         return output;
     }
 

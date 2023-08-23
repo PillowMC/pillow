@@ -2,7 +2,6 @@ package net.pillowmc.pillow.asm;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
@@ -22,6 +21,7 @@ import org.quiltmc.loader.impl.QuiltLoaderImpl;
 import org.quiltmc.loader.impl.filesystem.DelegatingUrlStreamHandlerFactory;
 import org.quiltmc.loader.impl.filesystem.QuiltJoinedFileSystemProvider;
 import org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider;
+import org.quiltmc.loader.impl.filesystem.QuiltUnifiedFileSystemProvider;
 import org.quiltmc.loader.impl.filesystem.QuiltZipFileSystemProvider;
 import org.quiltmc.loader.impl.game.GameProvider;
 import org.quiltmc.loader.impl.game.minecraft.Log4jLogHandler;
@@ -73,36 +73,12 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
             var mapField = catalog.getClass().getDeclaredField("map");
             mapField.setAccessible(true);
             var map = (Map<String, List<Object>>)mapField.get(catalog);
-            map.get("org.spongepowered.asm.service.IMixinService").removeIf((v) -> 
-                {
-                    try {
-                        return "org.quiltmc.loader".equals(((Module)v.getClass().getMethod("module").invoke(v)).getName());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                            | NoSuchMethodException | SecurityException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            );
-            map.get("org.spongepowered.asm.service.IMixinServiceBootstrap").removeIf((v) -> 
-                {
-                    try {
-                        return "org.quiltmc.loader".equals(((Module)v.getClass().getMethod("module").invoke(v)).getName());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                            | NoSuchMethodException | SecurityException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            );
-            map.get("org.spongepowered.asm.service.IGlobalPropertyService").removeIf((v) -> 
-                {
-                    try {
-                        return "org.quiltmc.loader".equals(((Module)v.getClass().getMethod("module").invoke(v)).getName());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                            | NoSuchMethodException | SecurityException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            );
+            map.get("org.spongepowered.asm.service.IMixinService")
+                .removeIf(Utils.rethrowPredicate(v -> !"pillow".equals(((Module)v.getClass().getMethod("module").invoke(v)).getName())));
+            map.get("org.spongepowered.asm.service.IMixinServiceBootstrap")
+                .removeIf(Utils.rethrowPredicate(v -> "org.quiltmc.loader".equals(((Module)v.getClass().getMethod("module").invoke(v)).getName())));
+            map.get("org.spongepowered.asm.service.IGlobalPropertyService")
+                .removeIf(Utils.rethrowPredicate(v -> "org.quiltmc.loader".equals(((Module)v.getClass().getMethod("module").invoke(v)).getName())));
             Utils.setModule(old, PillowTransformationService.class);
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             throw new RuntimeException(e);
@@ -120,15 +96,14 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         setupUncaughtExceptionHandler();
         // Don't touch here
         try {
-            var old = getClass().getModule();
-            unsafe.putObject(getClass(), offset, URL.class.getModule());
+            var old = Utils.setModule(URL.class.getModule(), getClass());
             var field = URL.class.getDeclaredField("factory");
             field.setAccessible(true);
             var oldFactory = (URLStreamHandlerFactory) field.get(null);
             field.set(null, null);
             DelegatingUrlStreamHandlerFactory.appendFactory(oldFactory);
             field.set(null, DelegatingUrlStreamHandlerFactory.INSTANCE);
-            unsafe.putObject(getClass(), offset, old);
+            Utils.setModule(old, getClass());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -144,17 +119,11 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
             newval.removeIf(i -> i.getClass().getName().contains("Quilt"));
             newval.add(new QuiltMemoryFileSystemProvider());
             newval.add(new QuiltJoinedFileSystemProvider());
+            newval.add(new QuiltUnifiedFileSystemProvider());
             newval.add(new QuiltZipFileSystemProvider());
             installedProviders.set(null, Collections.unmodifiableList(newval));
             unsafe.putObject(getClass(), offset, old);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            Launcher.INSTANCE.environment().findLaunchPlugin("mixin").orElseThrow().offerResource(
-                    Path.of(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()),
-                    "pillow");
-        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         provider = new PillowGameProvider();
@@ -175,8 +144,8 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         Log.debug(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
         if (cp.isEmpty())
             return List.of();
-        return List.of(new Resource(Layer.GAME,
-                List.of(SecureJar.from(sj -> PillowTransformationService.createJarMetadata(sj, "quiltMods"),
+        return  List.of(new Resource(Layer.GAME,
+                List.of(SecureJar.from(sj -> createJarMetadata(sj, "quiltMods"),
                         cp.toArray(new Path[0])))));
     }
 
@@ -201,7 +170,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     private GameProvider provider;
     private final List<Path> cp = new ArrayList<>();
-    private static List<String> NO_ADDING = List.of("pillow", "forge", "minecraft");
+    public static List<String> NO_LOAD_MODS = List.of("pillow", "forge", "minecraft", "java");
 
     // QuiltLauncher start
 
@@ -210,11 +179,11 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         var name = Utils.extractZipPath(path);
         try {
             if (!name.getClass().getName().contains("Union")
-                    && !name.equals(Utils
-                            .extractUnionPaths(
-                                    Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
-                            .get(0)))
-                cp.add(name);
+                && !name.equals(Utils
+                        .extractUnionPaths(
+                                Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
+                        .get(0)))
+                cp.add(path);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -241,7 +210,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public InputStream getResourceAsStream(String name) {
-        return this.getClass().getClassLoader().getResourceAsStream(name);
+        return this.getTargetClassLoader().getResourceAsStream(name);
     }
 
     @Override
@@ -281,7 +250,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public void addToClassPath(Path path, ModContainer mod, URL origin, String... allowedPrefixes) {
-        if (NO_ADDING.contains(mod.metadata().id())) return;
+        if (NO_LOAD_MODS.contains(mod.metadata().id())) return;
         addToClassPath(path, allowedPrefixes);
     }
 
