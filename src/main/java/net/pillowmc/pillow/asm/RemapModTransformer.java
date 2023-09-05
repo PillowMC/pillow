@@ -5,7 +5,10 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.commons.Remapper;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 
 import cpw.mods.modlauncher.api.ITransformer;
@@ -23,9 +26,34 @@ public class RemapModTransformer implements ITransformer<ClassNode> {
 
     @Override
     public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context) {
-        ClassNode output = new ClassNode();
-        input.accept(new PillowClassRemapper(output, remapper));
-        return output;
+        if (input.invisibleAnnotations == null) return input;
+        boolean isMixin = false;
+        for (AnnotationNode node : input.invisibleAnnotations) {
+            if (node.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;")) {
+                isMixin = true;
+                break;
+            }
+        }
+        if (!isMixin) return input;
+        for (FieldNode node : input.fields) {
+            if (node.visibleAnnotations == null) continue;
+            for (AnnotationNode ann : node.visibleAnnotations) {
+                if (ann.desc.equals("Lorg/spongepowered/asm/mixin/Shadow;")) {
+                    node.name = remapper.mapFieldName("", node.name, node.desc);
+                    return input;
+                }
+            }
+        }
+        for (MethodNode node : input.methods) {
+            if (node.visibleAnnotations == null) continue;
+            for (AnnotationNode ann : node.visibleAnnotations) {
+                if (ann.desc.equals("Lorg/spongepowered/asm/mixin/Overwrite;")) {
+                    node.name = remapper.mapMethodName("", node.name, node.desc);
+                    return input;
+                }
+            }
+        }
+        return input;
     }
 
     @Override

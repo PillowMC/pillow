@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,10 +41,9 @@ import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import net.fabricmc.api.EnvType;
+import net.minecraftforge.fml.loading.LibraryFinder;
 import net.pillowmc.pillow.PillowGameProvider;
 import net.pillowmc.pillow.Utils;
-import net.pillowmc.pillow.asm.qsl.itemsettings.LivingEntityMixinTransformer;
-import net.pillowmc.pillow.asm.qsl.resourceloader.MinecraftClientMixinTransformer;
 import sun.misc.Unsafe;
 
 public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
@@ -93,6 +93,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     @Override
     @SuppressWarnings("unchecked")
     public void initialize(IEnvironment environment) {
+        setProperties(new HashMap<>());
         setupUncaughtExceptionHandler();
         // Don't touch here
         try {
@@ -144,9 +145,12 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         Log.debug(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
         if (cp.isEmpty())
             return List.of();
-        return  List.of(new Resource(Layer.GAME,
-                List.of(SecureJar.from(sj -> createJarMetadata(sj, "quiltMods"),
-                        cp.toArray(new Path[0])))));
+        var modResource = new Resource(Layer.GAME,
+            List.of(SecureJar.from(sj -> createJarMetadata(sj, "quiltMods"),
+                    cp.toArray(new Path[0]))));
+        var dfuJar = SecureJar.from(LibraryFinder.findPathForMaven("com.mojang", "datafixerupper", "", "", "6.0.8"));
+        var depResource = new Resource(Layer.GAME, List.of(dfuJar));
+        return  List.of(modResource, depResource);
     }
 
     @Override
@@ -160,8 +164,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         return List.of(
                 Utils.getSide() == EnvType.CLIENT ? new ClientEntryPointTransformer()
                         : new ServerEntryPointTransformer(),
-                new AWTransformer(), new ModListScreenTransformer(), new RemapModTransformer(),
-                new MinecraftClientMixinTransformer(), new LivingEntityMixinTransformer());
+                new AWTransformer());
     }
 
     public static JarMetadata createJarMetadata(SecureJar sj, String name) {
@@ -230,7 +233,9 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public boolean isDevelopment() {
-        return Thread.currentThread().getStackTrace()[2].getClassName().contains("ClasspathModCandidateFinder");
+        var trace = Thread.currentThread().getStackTrace();
+        return trace[2].getClassName().contains("ClasspathModCandidateFinder")
+            || trace[4].getMethodName().equals("scan0");
     }
 
     @Override
@@ -240,7 +245,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public String getTargetNamespace() {
-        return "intermediary"; // Trick Quilt
+        return "srg";
     }
 
     @Override

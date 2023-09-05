@@ -8,7 +8,7 @@ import net.fabricmc.mapping.tree.TinyTree;
 import net.pillowmc.remapper.NameOnlyRemapper;
 
 public class RemapperUtils {
-    private static final Predicate<String> NAME_FILTER = Pattern.compile("^((field|method)_\\d+|[fm]_\\d+_)$").asPredicate();
+    private static final Predicate<String> NAME_FILTER = Pattern.compile("^((field|method|comp)_\\d+|[fm]_\\d+_)$").asPredicate();
     private RemapperUtils(){}
     public static NameOnlyRemapper create(TinyTree tree, String from, String to){
         var classes = new HashMap<String, String>();

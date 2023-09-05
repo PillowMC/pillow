@@ -8,11 +8,9 @@
 
 [中文](README.zh_hans.md) | English
 
-## Quilt that runs on ModLauncher with NeoForge
+## Run Quilt and Fancy Mod Loader on ModLauncher together
 
-_Not implemented yet._
-
-Yes, you can believe it. This mod will make Quilt and NeoForge run on ModLauncher *at the same time*.
+This mod can let Quilt and Fancy Mod Loader run on the top of ModLauncher with Minecraft obfuscated with Searge name.
 ## Installing
 
 _Not developed yet._
@@ -23,8 +21,8 @@ _Not opened yet._
 
 ## License
 
-This project is licensed under [MIT](License.txt).
+This project is licensed under [MIT License](License.txt).
 
 Quilt loader is licensed under [Apache](License.Quilt.txt).
 
-NeoForge is licensed under [LGPL 2.1](License.NeoForge.txt).
+Fancy Mod Loader is licensed under [LGPL 2.1](License.FancyModLoader.txt).

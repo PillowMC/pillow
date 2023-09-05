@@ -45,23 +45,17 @@ public class PillowGameProvider implements GameProvider {
     @Override
     public Collection<BuiltinMod> getBuiltinMods() {
         V1ModMetadataBuilder minecraftMetadata = new V1ModMetadataBuilder();
-        minecraftMetadata.id = getGameId();
-        minecraftMetadata.version = Version.of(getRawGameVersion());
-        minecraftMetadata.name = getGameName();
-        minecraftMetadata.group = "builtin";
-        minecraftMetadata.description = "Obfuscated as Searge name, MCP version = %s".formatted(FMLLoader.versionInfo().mcpVersion());
-        V1ModMetadataBuilder forgeMetadata = new V1ModMetadataBuilder();
-        forgeMetadata.id = "forge";
-        forgeMetadata.version = Version.of(FMLLoader.versionInfo().forgeVersion());
-        forgeMetadata.group = "net.neoforged";
+        minecraftMetadata.setId(getGameId());
+        minecraftMetadata.setVersion(Version.of(getRawGameVersion()));
+        minecraftMetadata.setName(getGameName());
+        minecraftMetadata.setGroup("builtin");
+        minecraftMetadata.setDescription("Obfuscated as Searge name, MCP version = %s".formatted(FMLLoader.versionInfo().mcpVersion()));
         try {
             var output = File.createTempFile("minecraft.virtual", ".jar");
             var path=output.toPath();
             JarOutputStream outJar=new JarOutputStream(new FileOutputStream(output));
             outJar.close();
-            return Arrays.asList(new BuiltinMod(List.of(path), minecraftMetadata.build()),
-                new BuiltinMod(List.of(path), forgeMetadata.build())
-            );
+            return Arrays.asList(new BuiltinMod(List.of(path), minecraftMetadata.build()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
