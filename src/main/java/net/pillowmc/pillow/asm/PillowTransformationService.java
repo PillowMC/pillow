@@ -164,6 +164,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         return List.of(
                 Utils.getSide() == EnvType.CLIENT ? new ClientEntryPointTransformer()
                         : new ServerEntryPointTransformer(),
+                new RemapModTransformer(),
                 new AWTransformer());
     }
 

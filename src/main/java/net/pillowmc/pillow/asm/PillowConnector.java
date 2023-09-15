@@ -5,6 +5,7 @@ import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.launch.common.QuiltMixinBootstrap;
 import org.quiltmc.loader.impl.util.log.Log;
 import org.quiltmc.loader.impl.util.log.LogCategory;
+import org.quiltmc.loader.impl.util.mappings.MixinIntermediaryDevRemapper;
 import org.spongepowered.asm.bridge.RemapperAdapter;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.connect.IMixinConnector;
@@ -29,16 +30,16 @@ public class PillowConnector implements IMixinConnector {
         // QuiltMixinBootstrap.init
         System.setProperty("mixin.env.remapRefMap", "true");
         try {
-            RemapperAdapter remapper = new RemapperAdapter(RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName)){
-                @Override
-                public String mapMethodName(String owner, String name, String desc) {
-                    if(name.startsWith("<")){
-                        return name;
-                    }
-                    return super.mapMethodName(owner, name, desc);
-                }
-            };
-            // MixinIntermediaryDevRemapper remapper = new MixinIntermediaryDevRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
+//            RemapperAdapter remapper = new RemapperAdapter(RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName)){
+//                @Override
+//                public String mapMethodName(String owner, String name, String desc) {
+//                    if(name.startsWith("<")){
+//                        return name;
+//                    }
+//                    return super.mapMethodName(owner, name, desc);
+//                }
+//            };
+            MixinIntermediaryDevRemapper remapper = new MixinIntermediaryDevRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
             MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
             Log.info(LogCategory.MIXIN, "Loaded Pillow mappings for mixin remapper!");
         } catch (Exception e) {

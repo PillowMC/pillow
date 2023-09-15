@@ -9,6 +9,21 @@ _绝非机翻译名_
 
 中文 | [English](README.md)
 
+## 图标
+![Icon](src/main/resources/assets/pillow/icon.png)
+令 $a=\frac{\sqrt{5}+1}{2}, b=\frac{a+1}{4}$
+
+在平面直角坐标系中作点
+
+$A(0, a), B(1, a), C(1, 0), D(0, 0), E(0, a-b), F(1, b)$,
+连接 $BE, CF, DF$
+
+连接 $AE, AC, BD$ 为 PillowMC 图标
+
+连接 $AE, AC$ 为 Pillow Mod Loader 图标
+
+连接 $BD$, 作 $CG$ 交 $G$ 使 $CG$ 延长线过 $A$ 为 Shear API 图标
+
 ## 运行在 ModLauncher 上的 Quilt 和 Fancy Mod Loader
 
 这个模组会让 Quilt 和 Fancy Mod Loader 在 ModLauncher 上和以 Searge 名混淆的 Minecraft 运行。
