@@ -40,30 +40,6 @@ public final class ModJarProcessor {
                 throw new RuntimeException(e);
             }
         });
-        // pathProcesser.apply(i).forEach(j->{
-        //     try {
-        //         var in=new JarInputStream(j.getFileSystem().provider().newInputStream(j));
-        //         var next=in.getNextJarEntry();
-        //         while(next!=null){
-        //             if(next.getName().startsWith("META-INF/services")){
-        //                 next=in.getNextJarEntry();
-        //                 continue;
-        //             }
-        //             if(next.isDirectory())outJar.putNextEntry(next);
-        //             else if(!next.getName().endsWith(".class")){
-        //                 outJar.putNextEntry(next);
-        //                 outJar.write(in.readAllBytes());
-        //             }else{
-        //                 String name=next.getName();
-        //                 if(!PillowNamingContext.isUserDev)classes.add(name.substring(0, name.length()-6).replace("/", "."));
-        //             }
-        //             next=in.getNextJarEntry();
-        //         }
-        //         in.close();
-        //     } catch (IOException e) {
-        //         // Nothing to do.
-        //     }
-        // });
         outJar.putNextEntry(new JarEntry("pack.mcmeta"));
         outJar.write(("{\"pack\": {\"pack_format\": 9,\"description\": \""+modFile.metadata().id()+"\"}}").getBytes());
         outJar.close();
