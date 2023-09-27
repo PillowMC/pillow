@@ -53,6 +53,7 @@ public class RemapModTransformer implements ITransformer<ClassNode> {
             }
         }
         if (null == cn) return input;
+        var cnSrg = remapper.map(cn);
         for (FieldNode node : input.fields) {
             if (node.visibleAnnotations == null) continue;
             for (AnnotationNode ann : node.visibleAnnotations) {
@@ -69,7 +70,7 @@ public class RemapModTransformer implements ITransformer<ClassNode> {
                 } else if (ann.desc.startsWith("Lorg/spongepowered/asm/mixin/injection")) {
                     var methods = (List<String>)ann.values.get(ann.values.indexOf("method") + 1);
                     for (int i = 0; i < methods.size(); i++) {
-                        methods.set(i, cn + "." + methods.get(i));
+                        methods.set(i, cnSrg + "." + methods.get(i));
                     }
                 }
             }

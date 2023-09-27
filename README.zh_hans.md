@@ -11,6 +11,9 @@ _绝非机翻译名_
 
 ## 图标
 ![Icon](src/main/resources/assets/pillow/icon.png)
+
+鸣谢: [Desmos](https://www.desmos.com/)
+
 令 $a=\frac{\sqrt{5}+1}{2}, b=\frac{a+1}{4}$
 
 在平面直角坐标系中作点
@@ -26,7 +29,10 @@ $A(0, a), B(1, a), C(1, 0), D(0, 0), E(0, a-b), F(1, b)$,
 
 ## 运行在 ModLauncher 上的 Quilt 和 Fancy Mod Loader
 
-这个模组会让 Quilt 和 Fancy Mod Loader 在 ModLauncher 上和以 Searge 名混淆的 Minecraft 运行。
+这个模组会让 Quilt 加载器和 Fancy Mod Loader 在 ModLauncher 上和以 Searge 名混淆的 Minecraft 运行。
+
+## 开发进度
+几乎已经完成。目前除了生物群系 API 不兼容，QSL 和 QFAPI 各个模块均正常工作。
 
 ## 安装
 

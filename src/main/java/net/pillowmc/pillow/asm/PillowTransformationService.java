@@ -19,6 +19,7 @@ import java.util.jar.Manifest;
 import org.jetbrains.annotations.NotNull;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
+import org.quiltmc.loader.impl.config.QuiltConfigImpl;
 import org.quiltmc.loader.impl.filesystem.DelegatingUrlStreamHandlerFactory;
 import org.quiltmc.loader.impl.filesystem.QuiltJoinedFileSystemProvider;
 import org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider;
@@ -138,6 +139,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         loader.load();
         loader.freeze();
         QuiltLoaderImpl.INSTANCE.loadAccessWideners();
+        QuiltConfigImpl.init();
     }
 
     @Override
@@ -164,7 +166,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         return List.of(
                 Utils.getSide() == EnvType.CLIENT ? new ClientEntryPointTransformer()
                         : new ServerEntryPointTransformer(),
-                new RemapModTransformer(),
+                // new RemapModTransformer(),
                 new AWTransformer());
     }
 
@@ -174,7 +176,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     private GameProvider provider;
     private final List<Path> cp = new ArrayList<>();
-    public static List<String> NO_LOAD_MODS = List.of("pillow", "forge", "minecraft", "java");
+    public static List<String> NO_LOAD_MODS = List.of("pillow-loader", "forge", "minecraft", "java");
 
     // QuiltLauncher start
 

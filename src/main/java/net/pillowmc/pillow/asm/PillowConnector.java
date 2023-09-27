@@ -28,7 +28,6 @@ public class PillowConnector implements IMixinConnector {
         PillowTransformationService.unsafe.putObject(getClass(), PillowTransformationService.offset, pillow);
         var mappings=QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
         // QuiltMixinBootstrap.init
-        System.setProperty("mixin.env.remapRefMap", "true");
         try {
 //            RemapperAdapter remapper = new RemapperAdapter(RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName)){
 //                @Override
@@ -41,9 +40,9 @@ public class PillowConnector implements IMixinConnector {
 //            };
             MixinIntermediaryDevRemapper remapper = new MixinIntermediaryDevRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
             MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
-            Log.info(LogCategory.MIXIN, "Loaded Pillow mappings for mixin remapper!");
+            Log.info(LogCategory.MIXIN, "Loaded Pillow Loader mappings for mixin remapper!");
         } catch (Exception e) {
-            Log.error(LogCategory.MIXIN, "Pillow environment setup error - the game will probably crash soon!");
+            Log.error(LogCategory.MIXIN, "Pillow Loader environment setup error - the game will probably crash soon!");
             e.printStackTrace();
         }
         QuiltMixinBootstrap.init(QuiltLauncherBase.getLauncher().getEnvironmentType(), QuiltLoaderImpl.INSTANCE);
