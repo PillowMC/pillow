@@ -31,7 +31,7 @@ Connect $BD $and make $CG $cross $G $to make the extension line of $CG $pass thr
 This mod can let Quilt Loader and Fancy Mod Loader run on the top of ModLauncher with Minecraft obfuscated with Searge name.
 
 ## Developing Status
-Almost done. All modules in QSL and QFAPI worked well, except biome API and registry API.
+Almost done. All modules in QSL and QFAPI worked well, except biome API.
 
 ## Installing
 
@@ -43,8 +43,8 @@ _Not opened yet._
 
 ## License
 
-This project is licensed under [MIT License](License.txt).
+This project is licensed under [MIT License](LICENSE).
 
-Quilt Loader is licensed under [Apache](License.Quilt.txt).
+Quilt Loader is licensed under [Apache](LICENSE.Quilt).
 
-Fancy Mod Loader is licensed under [LGPL 2.1](License.FancyModLoader.txt).
+Fancy Mod Loader is licensed under [LGPL 2.1](LICENSE.FancyModLoader).

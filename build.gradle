@@ -1,7 +1,8 @@
 buildscript {
     repositories {
         // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public/' }
+        // mavenCentral()
     }
     dependencies {
         // classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
@@ -13,12 +14,13 @@ plugins {
     id 'eclipse'
     id 'maven-publish'
     id 'java-library'
+	id 'org.quiltmc.gradle.licenser' version '2.0.1'
 }
 // apply plugin: 'net.minecraftforge.gradle'
 // apply plugin: 'org.spongepowered.mixin'
 
 
-version = "0.1.0"
+version = "0.1.1"
 group = 'net.pillowmc' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'pillow'
 
@@ -30,6 +32,12 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 //     mappings channel: 'official', version: '1.18.2'
 //     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 // }
+
+license {
+    rule project.rootProject.file("LICENSE")
+    include '**/*.java'
+    exclude '**/io/github/steelwoolmc/**/*.java'
+}
 
 java {
     withSourcesJar()
@@ -91,7 +99,6 @@ dependencies {
     implementation "commons-io:commons-io:2.11.0"
 //    implementation "org.spongepowered:mixin:0.8.5"
     implementation "org.jetbrains:annotations:23.0.0"
-    api "net.pillowmc:pillow-remapper:0.1.1"
     api "net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5"
     api ("org.quiltmc:quilt-loader:0.20.0-beta.14") {
 //        exclude module: "sponge-mixin"

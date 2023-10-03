@@ -44,8 +44,8 @@ _未开放_
 
 ## 许可证
 
-这个项目的许可证是 [MIT 许可证](License.txt)。
+这个项目的许可证是 [MIT 许可证](LICENSE)。
 
-Quilt 加载器项目的许可证是 [Apache](License.Quilt.txt)。
+Quilt 加载器项目的许可证是 [Apache](LICENSE.Quilt)。
 
-Fancy Mod Loader 项目的许可证是 [LGPL 2.1](License.FancyModLoader.txt)。
+Fancy Mod Loader 项目的许可证是 [LGPL 2.1](LICENSE.FancyModLoader)。
