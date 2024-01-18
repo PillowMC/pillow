@@ -20,11 +20,11 @@ Creating Points in a Planar Cartesian Coordinate System:
 $A(0, a), B(1, a), C(1, 0), D(0, 0), E(0, a-b), F(1, b)$,
 Connect $BE, CF, DF$
 
-Connect $AE, AC, BD $ as PillowMC icons
+Connect $AE, AC, BD$ as PillowMC icons
 
-Connect $AE, AC $is the Pillow Mod Loader icon
+Connect $AE, AC$ is the Pillow Mod Loader icon
 
-Connect $BD $and make $CG $cross $G $to make the extension line of $CG $pass through $A $as the Shear API icon
+Connect $BD$ and make $CG$ cross $G$ to make the extension line of $CG$ pass through $A$ as the Shear API icon
 
 ## Run Quilt and Fancy Mod Loader on ModLauncher together
 
