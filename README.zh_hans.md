@@ -5,7 +5,7 @@ _绝非机翻译名_
 ![Github forks](https://img.shields.io/github/forks/PillowMC/pillow.svg)
 ![Github issues](https://img.shields.io/github/issues/PillowMC/pillow.svg)
 ![Github PRs](https://img.shields.io/github/issues-pr/PillowMC/pillow.svg)
-![Github Action Status](https://img.shields.io/github/workflow/status/PillowMC/pillow/Java%20CI%20with%20Gradle/dev.svg)
+![Github Action Status]([https://img.shields.io/github/workflow/status/PillowMC/pillow/Java%20CI%20with%20Gradle/dev.svg](https://img.shields.io/github/actions/workflow/status/PillowMC/pillow/gradle.yml?branch=dev))
 
 中文 | [English](README.md)
 
