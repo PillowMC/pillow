@@ -25,7 +25,6 @@
 package net.pillowmc.pillow.asm;
 
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
@@ -47,6 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
 import org.quiltmc.loader.impl.config.QuiltConfigImpl;
+import org.quiltmc.loader.impl.entrypoint.GameTransformer;
 import org.quiltmc.loader.impl.filesystem.DelegatingUrlStreamHandlerFactory;
 import org.quiltmc.loader.impl.filesystem.QuiltJoinedFileSystemProvider;
 import org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider;
@@ -59,6 +59,8 @@ import org.quiltmc.loader.impl.plugin.gui.I18n;
 import org.quiltmc.loader.impl.util.log.Log;
 import org.quiltmc.loader.impl.util.log.LogCategory;
 
+import cpw.mods.jarhandling.JarContents;
+import cpw.mods.jarhandling.JarContentsBuilder;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.jarhandling.impl.SimpleJarMetadata;
@@ -70,30 +72,18 @@ import io.github.steelwoolmc.mixintransmog.GeneratedMixinClassesSecureJar;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import net.fabricmc.api.EnvType;
-import net.minecraftforge.fml.loading.LibraryFinder;
+import net.neoforged.fml.loading.LibraryFinder;
 import net.pillowmc.pillow.PillowGameProvider;
 import net.pillowmc.pillow.Utils;
-import sun.misc.Unsafe;
+import net.pillowmc.pillow.hacks.SuperHackyClassLoader;
 
 public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
-    public static Unsafe unsafe;
-    public static long offset;
-    static {
-        Field theUnsafe;
-        try {
-            theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            unsafe = (Unsafe) theUnsafe.get(null);
-            Field module = Class.class.getDeclaredField("module");
-            offset = unsafe.objectFieldOffset(module);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
 
+    @SuppressWarnings("unchecked")
     public PillowTransformationService() {
         var layer = Launcher.INSTANCE.findLayerManager().get().getLayer(Layer.BOOT).get();
         Utils.setModule(Thread.currentThread().getContextClassLoader().getUnnamedModule(), I18n.class);
+        // Remove other mixin services. These services may not work well.
         try {
             var field = layer.getClass().getDeclaredField("servicesCatalog");
             var old = Utils.setModule(layer.getClass().getModule(), PillowTransformationService.class);
@@ -125,6 +115,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         setProperties(new HashMap<>());
         setupUncaughtExceptionHandler();
         // Don't touch here
+        // Reload URLStreamHandlerFactory(s).
         try {
             var old = Utils.setModule(URL.class.getModule(), getClass());
             var field = URL.class.getDeclaredField("factory");
@@ -138,10 +129,10 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
             throw new RuntimeException(e);
         }
         // End of don't touch here
+        // Add Quilt's FileSystemProviders.
         try {
             var FSPC = FileSystemProvider.class;
-            var old = getClass().getModule();
-            unsafe.putObject(getClass(), offset, FSPC.getModule());
+            var old = Utils.setModule(FSPC.getModule(), getClass());
             var installedProviders = FSPC.getDeclaredField("installedProviders");
             installedProviders.setAccessible(true);
             var val = (List<FileSystemProvider>) installedProviders.get(null);
@@ -152,21 +143,22 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
             newval.add(new QuiltUnifiedFileSystemProvider());
             newval.add(new QuiltZipFileSystemProvider());
             installedProviders.set(null, Collections.unmodifiableList(newval));
-            unsafe.putObject(getClass(), offset, old);
+            Utils.setModule(old, getClass());
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
         provider = new PillowGameProvider();
         Log.init(new Log4jLogHandler(), true);
+        // Maybe tomorrow's Pillow Loader uses this?
         provider.locateGame(this, new String[0]);
         Log.info(LogCategory.GAME_PROVIDER, "Loading %s %s with Quilt Loader %s", provider.getGameName(),
                 provider.getRawGameVersion(), QuiltLoaderImpl.VERSION);
         provider.initialize(this);
+        // It's time for Quilt!
         QuiltLoaderImpl loader = QuiltLoaderImpl.INSTANCE;
         loader.setGameProvider(provider);
         loader.load();
         loader.freeze();
-        QuiltLoaderImpl.INSTANCE.loadAccessWideners();
         QuiltConfigImpl.init();
     }
 
@@ -179,9 +171,12 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         Log.debug(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
         if (cp.isEmpty())
             return List.of();
+        // We merge all Quilt mods into one module.
+        var modContents = new JarContentsBuilder()
+            .paths(cp.toArray(new Path[0]))
+            .build();
         var modResource = new Resource(Layer.GAME,
-            List.of(SecureJar.from(sj -> createJarMetadata(sj, "quiltMods"),
-                    cp.toArray(new Path[0]))));
+            List.of(SecureJar.from(modContents, createJarMetadata(modContents, "quiltMods"))));
         var dfuJar = SecureJar.from(LibraryFinder.findPathForMaven("com.mojang", "datafixerupper", "", "", "6.0.8"));
         var depResource = new Resource(Layer.GAME, List.of(dfuJar));
         return  List.of(modResource, depResource);
@@ -197,9 +192,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     public @NotNull List<ITransformer> transformers() {
         return List.of(
                 Utils.getSide() == EnvType.CLIENT ? new ClientEntryPointTransformer()
-                        : new ServerEntryPointTransformer(),
-                // new RemapModTransformer(),
-                new AWTransformer());
+                        : new ServerEntryPointTransformer());
     }
 
     @Override
@@ -207,8 +200,8 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
         return null;
     }
 
-    public static JarMetadata createJarMetadata(SecureJar sj, String name) {
-        return new SimpleJarMetadata(name, "1.0.0", sj.getPackages(), sj.getProviders());
+    public static JarMetadata createJarMetadata(JarContents contents, String name) {
+        return new SimpleJarMetadata(name, "1.0.0", contents::getPackages, contents.getMetaInfServices());
     }
 
     private GameProvider provider;
@@ -258,6 +251,11 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public ClassLoader getTargetClassLoader() {
+        // Let Quilt get the real location of itself.
+        var trace = Thread.currentThread().getStackTrace();
+        if(trace[2].getClassName().contains("ClasspathModCandidateFinder")
+            && trace[2].getMethodName().equals("findCandidates"))
+            return new SuperHackyClassLoader();
         return Thread.currentThread().getContextClassLoader();
     }
 
@@ -285,7 +283,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
     @Override
     public String getTargetNamespace() {
-        return "srg";
+        return "official";
     }
 
     @Override
@@ -323,5 +321,21 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
     @Override
     public ClassLoader getClassLoader(ModContainer mod) {
         return getTargetClassLoader();
+    }
+
+    @Override
+    public void setHiddenClasses(Set<String> classes) {
+        // TODO Error when load these classes.
+    }
+
+    private final GameTransformer gameTransformer = new GameTransformer() {
+        public byte[] transform(String className) {
+            return null;
+        };
+    };
+
+    @Override
+    public GameTransformer getEntrypointTransformer() {
+        return this.gameTransformer;
     }
 }

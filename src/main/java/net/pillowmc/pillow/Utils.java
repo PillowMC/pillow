@@ -25,8 +25,10 @@
 package net.pillowmc.pillow;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.quiltmc.loader.impl.FormattedException;
@@ -36,7 +38,7 @@ import org.quiltmc.loader.impl.filesystem.QuiltZipPath;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLLoader;
 import sun.misc.Unsafe;
 
 public class Utils {
@@ -88,6 +90,30 @@ public class Utils {
             }
         }
         return List.of(path);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Path getUnionPathRealPath(Path path) {
+        if(path.getClass().getName().contains("Union")){
+            if(path.getClass().getName().contains("Union")){
+                var pc=path.getClass();
+                var old=setModule(pc.getModule(), Utils.class);
+                try {
+                    var fsf=pc.getDeclaredField("fileSystem");
+                    fsf.setAccessible(true);
+                    var fs=fsf.get(path);
+                    var fsc=fs.getClass();
+                    var findFirstFilteredMethod = fsc.getDeclaredMethod("findFirstFiltered", pc);
+                    findFirstFilteredMethod.setAccessible(true);
+                    var ret = (Optional<Path>) findFirstFilteredMethod.invoke(fs, path);
+                    setModule(old, Utils.class);
+                    return ret.get();
+                } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException | NoSuchMethodException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return path;
     }
 
     public static Path extractZipPath(Path path) {

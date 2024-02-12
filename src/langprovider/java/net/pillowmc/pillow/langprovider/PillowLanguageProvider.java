@@ -28,11 +28,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.quiltmc.loader.api.ModContainer;
-import net.minecraftforge.forgespi.language.ILifecycleEvent;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.language.IModLanguageProvider;
-import net.minecraftforge.forgespi.language.IModLanguageProvider.IModLanguageLoader;
-import net.minecraftforge.forgespi.language.ModFileScanData;
+import net.neoforged.neoforgespi.language.ILifecycleEvent;
+import net.neoforged.neoforgespi.language.IModInfo;
+import net.neoforged.neoforgespi.language.IModLanguageProvider;
+import net.neoforged.neoforgespi.language.IModLanguageProvider.IModLanguageLoader;
+import net.neoforged.neoforgespi.language.ModFileScanData;
 
 public class PillowLanguageProvider implements IModLanguageProvider, IModLanguageLoader {
 

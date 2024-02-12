@@ -26,19 +26,18 @@ package net.pillowmc.pillow.launch;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import net.minecraftforge.fml.loading.VersionInfo;
-import net.minecraftforge.fml.loading.targets.CommonServerLaunchHandler;
+import org.quiltmc.loader.api.QuiltLoader;
+
+import net.neoforged.fml.loading.VersionInfo;
+import net.neoforged.fml.loading.targets.CommonServerLaunchHandler;
 
 public class PillowServerLaunchHandler extends CommonServerLaunchHandler {
     @Override public String name() { return "pillowserver"; }
 
     @Override
-    protected BiPredicate<String, String> processMCStream(VersionInfo versionInfo, Stream.Builder<Path> mc, BiPredicate<String, String> filter, Stream.Builder<List<Path>> mods) {
-        // var forgejar = LibraryFinder.findPathForMaven("net.neoforged", "forge", "", "universal", versionInfo.mcAndForgeVersion());
-        // mods.add(List.of(forgejar));
-        return filter;
+    protected void processMCStream(VersionInfo versionInfo, Stream.Builder<Path> mc, Stream.Builder<List<Path>> mods) {
+        mc.accept(QuiltLoader.getModContainer("minecraft").get().rootPath());
     }
 }

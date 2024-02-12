@@ -24,24 +24,22 @@
 
 package net.pillowmc.pillow;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.jar.JarOutputStream;
 
 import org.quiltmc.loader.api.Version;
 import org.quiltmc.loader.impl.entrypoint.GameTransformer;
 import org.quiltmc.loader.impl.game.GameProvider;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncher;
+import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.metadata.qmj.V1ModMetadataBuilder;
 import org.quiltmc.loader.impl.util.Arguments;
-
 import net.fabricmc.api.EnvType;
-import net.minecraftforge.fml.loading.FMLLoader;
+
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.LibraryFinder;
 
 public class PillowGameProvider implements GameProvider {
     private String[] args;
@@ -73,16 +71,15 @@ public class PillowGameProvider implements GameProvider {
         minecraftMetadata.setVersion(Version.of(getRawGameVersion()));
         minecraftMetadata.setName(getGameName());
         minecraftMetadata.setGroup("builtin");
-        minecraftMetadata.setDescription("Obfuscated as Searge name, MCP version = %s".formatted(FMLLoader.versionInfo().mcpVersion()));
-        try {
-            var output = File.createTempFile("minecraft.virtual", ".jar");
-            var path=output.toPath();
-            JarOutputStream outJar=new JarOutputStream(new FileOutputStream(output));
-            outJar.close();
-            return Arrays.asList(new BuiltinMod(List.of(path), minecraftMetadata.build()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        minecraftMetadata.setDescription("Deobfuscated, NeoForm version = %s".formatted(FMLLoader.versionInfo().neoFormVersion()));
+        Path path;
+        var vers = FMLLoader.versionInfo();
+        if (Utils.getSide() == EnvType.SERVER) {
+            path = LibraryFinder.findPathForMaven("net.minecraft", "server", "", "srg", vers.mcAndNeoFormVersion());
+        } else {
+            path = LibraryFinder.findPathForMaven("net.minecraft", "client", "", "srg", vers.mcAndNeoFormVersion());
         }
+        return Arrays.asList(new BuiltinMod(List.of(path), minecraftMetadata.build()));
     }
 
     @Override
@@ -126,7 +123,7 @@ public class PillowGameProvider implements GameProvider {
 
     @Override
     public GameTransformer getEntrypointTransformer() {
-        return null;
+        return QuiltLauncherBase.getLauncher().getEntrypointTransformer();
     }
 
     @Override

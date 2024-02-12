@@ -24,10 +24,13 @@
 
 package net.pillowmc.pillow.langprovider;
 
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.loader.api.ModContainer;
-import net.minecraftforge.forgespi.language.IModInfo;
 
-public class PillowModContainer extends net.minecraftforge.fml.ModContainer {
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforgespi.language.IModInfo;
+
+public class PillowModContainer extends net.neoforged.fml.ModContainer {
     private final ModContainer container;
 
     public PillowModContainer(IModInfo info, ModContainer container) {
@@ -44,6 +47,11 @@ public class PillowModContainer extends net.minecraftforge.fml.ModContainer {
     @Override
     public Object getMod() {
         return container;
+    }
+
+    @Override
+    public @Nullable IEventBus getEventBus() {
+        return new DummyEventBus();
     }
     
 }

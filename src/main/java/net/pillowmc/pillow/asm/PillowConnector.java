@@ -35,22 +35,33 @@ import org.spongepowered.asm.mixin.connect.IMixinConnector;
 
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
+import net.pillowmc.pillow.Utils;
 
 public class PillowConnector implements IMixinConnector {
     @Override
     public void connect() {
         var manager=Launcher.INSTANCE.findLayerManager().orElseThrow();
         var mods=manager.getLayer(Layer.GAME).orElseThrow().findModule("quiltMods").orElse(null);
-        if(mods==null)return; // No Quilt/Pillow Mod installed.
-        var pillow=getClass().getModule();
-        PillowTransformationService.unsafe.putObject(getClass(), PillowTransformationService.offset, mods);
-        var loader=manager.getLayer(Layer.BOOT).orElseThrow().findModule(PillowNamingContext.isUserDev?"org.quiltmc.loader.beta._2":"org.quiltmc.loader").orElseThrow();
+        if(mods==null)return; // No Quilt Mod installed.
+        var bootLayer = manager.getLayer(Layer.BOOT).orElseThrow();
+        var loader=bootLayer.findModule(PillowNamingContext.isUserDev?"org.quiltmc.loader.beta._2":"org.quiltmc.loader").orElseThrow();
+        var sqlModule = bootLayer.findModule("java.sql").orElseThrow();
+        var mixinModule = IMixinConnector.class.getModule();
+        var selfModule = Utils.setModule(mods, getClass());
         mods.addReads(loader);
-        PillowTransformationService.unsafe.putObject(getClass(), PillowTransformationService.offset, loader);
+        Utils.setModule(loader, getClass());
         loader.addReads(mods);
-        PillowTransformationService.unsafe.putObject(getClass(), PillowTransformationService.offset, pillow);
+        Utils.setModule(mixinModule, getClass());
+        mixinModule.addReads(sqlModule);
+        try {
+            mixinModule.addUses(Class.forName("org.spongepowered.include.com.google.common.base.PatternCompiler"));
+        } catch (ClassNotFoundException e1) {
+            throw new RuntimeException(e1);
+        }
+        Utils.setModule(selfModule, getClass());
         var mappings=QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
         // QuiltMixinBootstrap.init
+        System.setProperty("mixin.env.remapRefMap", "true");
         try {
 //            RemapperAdapter remapper = new RemapperAdapter(RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName)){
 //                @Override

@@ -6,7 +6,7 @@
         "version": "${version}",
         "metadata": {
             "name": "Pillow Mod Loader",
-            "description": "Allows Quilt Loader and FML work on ModLauncher with Searge obfuscated Minecraft, which NeoForge uses.",
+            "description": "Allows Quilt Loader and FML work on ModLauncher with deobfuscated Minecraft (Mojang Mappings), which NeoForge uses.",
             "contributors": {
                 "PillowMC": "Owner"
             },
@@ -21,12 +21,6 @@
         "intermediate_mappings": "net.fabricmc:intermediary"
     },
     "modmenu": {
-        "parent": {
-            "id": "pillowmc",
-            "name": "The PillowMC Project",
-            "description": "Put almost all mods you like together.",
-            "icon": "assets/pillow/icon_pillowmc.png",
-            "update_checker": false
-        }
+        "badges": ["library"]
     }
 }
