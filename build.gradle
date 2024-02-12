@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
     id 'java-library'
 	id 'org.quiltmc.gradle.licenser' version '2.0.1'
+    id 'com.diffplug.spotless' version '6.22.0'
 }
 
 
@@ -31,6 +32,20 @@ sourceSets {
         compileClasspath += sourceSets.main.compileClasspath
         compileClasspath += sourceSets.main.output
     }
+}
+
+spotless {
+  java {
+    // Use the default importOrder configuration
+    importOrder()
+    endWithNewline()
+    indentWithSpaces()
+    removeUnusedImports()
+    // Cleanthat will refactor your code, but it may break your style: apply it before your formatter
+    cleanthat()
+    googleJavaFormat()
+    formatAnnotations()  // fixes formatting of type annotations, see below
+  }
 }
 
 repositories {
