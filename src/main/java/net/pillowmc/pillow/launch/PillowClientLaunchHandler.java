@@ -27,17 +27,19 @@ package net.pillowmc.pillow.launch;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream.Builder;
-
-import org.quiltmc.loader.api.QuiltLoader;
-
 import net.neoforged.fml.loading.VersionInfo;
 import net.neoforged.fml.loading.targets.CommonClientLaunchHandler;
+import org.quiltmc.loader.api.QuiltLoader;
 
 public class PillowClientLaunchHandler extends CommonClientLaunchHandler {
-    @Override public String name() { return "pillowclient"; }
+  @Override
+  public String name() {
+    return "pillowclient";
+  }
 
-    @Override
-    protected void processMCStream(VersionInfo versionInfo, Builder<Path> mc, Builder<List<Path>> mods) {
-        mc.accept(QuiltLoader.getModContainer("minecraft").get().rootPath());
-    }
+  @Override
+  protected void processMCStream(
+      VersionInfo versionInfo, Builder<Path> mc, Builder<List<Path>> mods) {
+    mc.accept(QuiltLoader.getModContainer("minecraft").get().rootPath());
+  }
 }

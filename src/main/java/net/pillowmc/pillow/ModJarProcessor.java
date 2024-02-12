@@ -28,22 +28,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
-
+import net.pillowmc.pillow.asm.PillowNamingContext;
 import org.quiltmc.loader.api.ModContainer;
 
-import net.pillowmc.pillow.asm.PillowNamingContext;
-
 public final class ModJarProcessor {
-    public static final Set<String> classes=new HashSet<>();
-    private ModJarProcessor() {}
-    public static void scanModJar(ModContainer modFile) throws IOException {
-        var i=modFile.rootPath();
-        Files.walk(i).forEach(path -> {
-            path = path.toAbsolutePath();
-            if (path.toString().endsWith(".class")) {
-                String name=path.toString();
-                if(!PillowNamingContext.isUserDev)classes.add(name.substring(1, name.length()-6).replace("/", "."));
-            }
-        });
-    }
+  public static final Set<String> classes = new HashSet<>();
+
+  private ModJarProcessor() {}
+
+  public static void scanModJar(ModContainer modFile) throws IOException {
+    var i = modFile.rootPath();
+    Files.walk(i)
+        .forEach(
+            path -> {
+              path = path.toAbsolutePath();
+              if (path.toString().endsWith(".class")) {
+                String name = path.toString();
+                if (!PillowNamingContext.isUserDev)
+                  classes.add(name.substring(1, name.length() - 6).replace("/", "."));
+              }
+            });
+  }
 }

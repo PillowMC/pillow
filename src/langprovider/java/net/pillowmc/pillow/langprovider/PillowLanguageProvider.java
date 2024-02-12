@@ -27,39 +27,42 @@ package net.pillowmc.pillow.langprovider;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.quiltmc.loader.api.ModContainer;
 import net.neoforged.neoforgespi.language.ILifecycleEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.IModLanguageProvider;
 import net.neoforged.neoforgespi.language.IModLanguageProvider.IModLanguageLoader;
 import net.neoforged.neoforgespi.language.ModFileScanData;
+import org.quiltmc.loader.api.ModContainer;
 
 public class PillowLanguageProvider implements IModLanguageProvider, IModLanguageLoader {
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T loadMod(IModInfo info, ModFileScanData modFileScanResults, ModuleLayer layer) {
-        try {
-            Class<?> pillowModContainerClass = Class.forName(getClass().getModule(), "net.pillowmc.pillow.langprovider.PillowModContainer");
-            return (T)pillowModContainerClass.getConstructor(IModInfo.class, ModContainer.class)
-                .newInstance(info, info.getConfig().<ModContainer>getConfigElement("quiltMod").orElseThrow());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T loadMod(IModInfo info, ModFileScanData modFileScanResults, ModuleLayer layer) {
+    try {
+      Class<?> pillowModContainerClass =
+          Class.forName(
+              getClass().getModule(), "net.pillowmc.pillow.langprovider.PillowModContainer");
+      return (T)
+          pillowModContainerClass
+              .getConstructor(IModInfo.class, ModContainer.class)
+              .newInstance(
+                  info, info.getConfig().<ModContainer>getConfigElement("quiltMod").orElseThrow());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    @Override
-    public String name() {
-        return "pillow";
-    }
+  @Override
+  public String name() {
+    return "pillow";
+  }
 
-    @Override
-    public Consumer<ModFileScanData> getFileVisitor() {
-        return d-> d.addLanguageLoader(Map.of(d.getIModInfoData().get(0).getMods().get(0).getModId(), this));
-    }
+  @Override
+  public Consumer<ModFileScanData> getFileVisitor() {
+    return d ->
+        d.addLanguageLoader(Map.of(d.getIModInfoData().get(0).getMods().get(0).getModId(), this));
+  }
 
-    @Override
-    public <R extends ILifecycleEvent<R>> void consumeLifecycleEvent(Supplier<R> consumeEvent) {
-    }
-    
+  @Override
+  public <R extends ILifecycleEvent<R>> void consumeLifecycleEvent(Supplier<R> consumeEvent) {}
 }

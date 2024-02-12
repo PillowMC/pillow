@@ -24,6 +24,9 @@
 
 package net.pillowmc.pillow.asm;
 
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
+import net.pillowmc.pillow.Utils;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.launch.common.QuiltMixinBootstrap;
@@ -33,52 +36,59 @@ import org.quiltmc.loader.impl.util.mappings.MixinIntermediaryDevRemapper;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.connect.IMixinConnector;
 
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
-import net.pillowmc.pillow.Utils;
-
 public class PillowConnector implements IMixinConnector {
-    @Override
-    public void connect() {
-        var manager=Launcher.INSTANCE.findLayerManager().orElseThrow();
-        var mods=manager.getLayer(Layer.GAME).orElseThrow().findModule("quiltMods").orElse(null);
-        if(mods==null)return; // No Quilt Mod installed.
-        var bootLayer = manager.getLayer(Layer.BOOT).orElseThrow();
-        var loader=bootLayer.findModule(PillowNamingContext.isUserDev?"org.quiltmc.loader.beta._2":"org.quiltmc.loader").orElseThrow();
-        var sqlModule = bootLayer.findModule("java.sql").orElseThrow();
-        var mixinModule = IMixinConnector.class.getModule();
-        var selfModule = Utils.setModule(mods, getClass());
-        mods.addReads(loader);
-        Utils.setModule(loader, getClass());
-        loader.addReads(mods);
-        Utils.setModule(mixinModule, getClass());
-        mixinModule.addReads(sqlModule);
-        try {
-            mixinModule.addUses(Class.forName("org.spongepowered.include.com.google.common.base.PatternCompiler"));
-        } catch (ClassNotFoundException e1) {
-            throw new RuntimeException(e1);
-        }
-        Utils.setModule(selfModule, getClass());
-        var mappings=QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
-        // QuiltMixinBootstrap.init
-        System.setProperty("mixin.env.remapRefMap", "true");
-        try {
-//            RemapperAdapter remapper = new RemapperAdapter(RemapperUtils.create(mappings, PillowNamingContext.fromName, PillowNamingContext.toName)){
-//                @Override
-//                public String mapMethodName(String owner, String name, String desc) {
-//                    if(name.startsWith("<")){
-//                        return name;
-//                    }
-//                    return super.mapMethodName(owner, name, desc);
-//                }
-//            };
-            MixinIntermediaryDevRemapper remapper = new MixinIntermediaryDevRemapper(mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
-            MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
-            Log.info(LogCategory.MIXIN, "Loaded Pillow Loader mappings for mixin remapper!");
-        } catch (Exception e) {
-            Log.error(LogCategory.MIXIN, "Pillow Loader environment setup error - the game will probably crash soon!");
-            e.printStackTrace();
-        }
-        QuiltMixinBootstrap.init(QuiltLauncherBase.getLauncher().getEnvironmentType(), QuiltLoaderImpl.INSTANCE);
+  @Override
+  public void connect() {
+    var manager = Launcher.INSTANCE.findLayerManager().orElseThrow();
+    var mods = manager.getLayer(Layer.GAME).orElseThrow().findModule("quiltMods").orElse(null);
+    if (mods == null) return; // No Quilt Mod installed.
+    var bootLayer = manager.getLayer(Layer.BOOT).orElseThrow();
+    var loader =
+        bootLayer
+            .findModule(
+                PillowNamingContext.isUserDev ? "org.quiltmc.loader.beta._2" : "org.quiltmc.loader")
+            .orElseThrow();
+    var sqlModule = bootLayer.findModule("java.sql").orElseThrow();
+    var mixinModule = IMixinConnector.class.getModule();
+    var selfModule = Utils.setModule(mods, getClass());
+    mods.addReads(loader);
+    Utils.setModule(loader, getClass());
+    loader.addReads(mods);
+    Utils.setModule(mixinModule, getClass());
+    mixinModule.addReads(sqlModule);
+    try {
+      mixinModule.addUses(
+          Class.forName("org.spongepowered.include.com.google.common.base.PatternCompiler"));
+    } catch (ClassNotFoundException e1) {
+      throw new RuntimeException(e1);
     }
+    Utils.setModule(selfModule, getClass());
+    var mappings = QuiltLauncherBase.getLauncher().getMappingConfiguration().getMappings();
+    // QuiltMixinBootstrap.init
+    System.setProperty("mixin.env.remapRefMap", "true");
+    try {
+      //            RemapperAdapter remapper = new RemapperAdapter(RemapperUtils.create(mappings,
+      // PillowNamingContext.fromName, PillowNamingContext.toName)){
+      //                @Override
+      //                public String mapMethodName(String owner, String name, String desc) {
+      //                    if(name.startsWith("<")){
+      //                        return name;
+      //                    }
+      //                    return super.mapMethodName(owner, name, desc);
+      //                }
+      //            };
+      MixinIntermediaryDevRemapper remapper =
+          new MixinIntermediaryDevRemapper(
+              mappings, PillowNamingContext.fromName, PillowNamingContext.toName);
+      MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
+      Log.info(LogCategory.MIXIN, "Loaded Pillow Loader mappings for mixin remapper!");
+    } catch (Exception e) {
+      Log.error(
+          LogCategory.MIXIN,
+          "Pillow Loader environment setup error - the game will probably crash soon!");
+      e.printStackTrace();
+    }
+    QuiltMixinBootstrap.init(
+        QuiltLauncherBase.getLauncher().getEnvironmentType(), QuiltLoaderImpl.INSTANCE);
+  }
 }

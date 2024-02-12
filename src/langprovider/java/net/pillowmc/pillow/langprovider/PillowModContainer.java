@@ -24,34 +24,32 @@
 
 package net.pillowmc.pillow.langprovider;
 
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.loader.api.ModContainer;
 
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforgespi.language.IModInfo;
-
 public class PillowModContainer extends net.neoforged.fml.ModContainer {
-    private final ModContainer container;
+  private final ModContainer container;
 
-    public PillowModContainer(IModInfo info, ModContainer container) {
-        super(info);
-        this.container=container;
-        contextExtension = () -> null;
-    }
+  public PillowModContainer(IModInfo info, ModContainer container) {
+    super(info);
+    this.container = container;
+    contextExtension = () -> null;
+  }
 
-    @Override
-    public boolean matches(Object mod)   {
-        return mod==container;
-    }
+  @Override
+  public boolean matches(Object mod) {
+    return mod == container;
+  }
 
-    @Override
-    public Object getMod() {
-        return container;
-    }
+  @Override
+  public Object getMod() {
+    return container;
+  }
 
-    @Override
-    public @Nullable IEventBus getEventBus() {
-        return new DummyEventBus();
-    }
-    
+  @Override
+  public @Nullable IEventBus getEventBus() {
+    return new DummyEventBus();
+  }
 }
