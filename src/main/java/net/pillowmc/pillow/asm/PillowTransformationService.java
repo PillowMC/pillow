@@ -75,288 +75,262 @@ import org.quiltmc.loader.impl.plugin.gui.I18n;
 import org.quiltmc.loader.impl.util.log.Log;
 import org.quiltmc.loader.impl.util.log.LogCategory;
 
-public class PillowTransformationService extends QuiltLauncherBase
-    implements ITransformationService {
-  @SuppressWarnings("unchecked")
-  public PillowTransformationService() {
-    var layer = Launcher.INSTANCE.findLayerManager().get().getLayer(Layer.BOOT).get();
-    Utils.setModule(Thread.currentThread().getContextClassLoader().getUnnamedModule(), I18n.class);
-    // Remove other mixin services. These services may not work well.
-    try {
-      var field = layer.getClass().getDeclaredField("servicesCatalog");
-      var old = Utils.setModule(layer.getClass().getModule(), PillowTransformationService.class);
-      field.setAccessible(true);
-      var catalog = field.get(layer);
-      var mapField = catalog.getClass().getDeclaredField("map");
-      mapField.setAccessible(true);
-      var map = (Map<String, List<Object>>) mapField.get(catalog);
-      map.get("org.spongepowered.asm.service.IMixinService")
-          .removeIf(
-              Utils.rethrowPredicate(
-                  v ->
-                      !"pillow"
-                          .equals(
-                              ((Module) v.getClass().getMethod("module").invoke(v)).getName())));
-      map.get("org.spongepowered.asm.service.IMixinServiceBootstrap")
-          .removeIf(
-              Utils.rethrowPredicate(
-                  v ->
-                      "org.quiltmc.loader"
-                          .equals(
-                              ((Module) v.getClass().getMethod("module").invoke(v)).getName())));
-      map.get("org.spongepowered.asm.service.IGlobalPropertyService")
-          .removeIf(
-              Utils.rethrowPredicate(
-                  v ->
-                      "org.quiltmc.loader"
-                          .equals(
-                              ((Module) v.getClass().getMethod("module").invoke(v)).getName())));
-      Utils.setModule(old, PillowTransformationService.class);
-    } catch (IllegalArgumentException
-        | IllegalAccessException
-        | NoSuchFieldException
-        | SecurityException e) {
-      throw new RuntimeException(e);
-    }
-  }
+public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
+	@SuppressWarnings("unchecked")
+	public PillowTransformationService() {
+		var layer = Launcher.INSTANCE.findLayerManager().get().getLayer(Layer.BOOT).get();
+		Utils.setModule(Thread.currentThread().getContextClassLoader().getUnnamedModule(), I18n.class);
+		// Remove other mixin services. These services may not work well.
+		try {
+			var field = layer.getClass().getDeclaredField("servicesCatalog");
+			var old = Utils.setModule(layer.getClass().getModule(), PillowTransformationService.class);
+			field.setAccessible(true);
+			var catalog = field.get(layer);
+			var mapField = catalog.getClass().getDeclaredField("map");
+			mapField.setAccessible(true);
+			var map = (Map<String, List<Object>>) mapField.get(catalog);
+			map.get("org.spongepowered.asm.service.IMixinService").removeIf(Utils.rethrowPredicate(
+					v -> !"pillow".equals(((Module) v.getClass().getMethod("module").invoke(v)).getName())));
+			map.get("org.spongepowered.asm.service.IMixinServiceBootstrap").removeIf(Utils.rethrowPredicate(
+					v -> "org.quiltmc.loader".equals(((Module) v.getClass().getMethod("module").invoke(v)).getName())));
+			map.get("org.spongepowered.asm.service.IGlobalPropertyService").removeIf(Utils.rethrowPredicate(
+					v -> "org.quiltmc.loader".equals(((Module) v.getClass().getMethod("module").invoke(v)).getName())));
+			Utils.setModule(old, PillowTransformationService.class);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-  @Override
-  public @NotNull String name() {
-    return "pillow";
-  }
+	@Override
+	public @NotNull String name() {
+		return "pillow";
+	}
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public void initialize(IEnvironment environment) {
-    setProperties(new HashMap<>());
-    setupUncaughtExceptionHandler();
-    // Don't touch here
-    // Reload URLStreamHandlerFactory(s).
-    try {
-      var old = Utils.setModule(URL.class.getModule(), getClass());
-      var field = URL.class.getDeclaredField("factory");
-      field.setAccessible(true);
-      var oldFactory = (URLStreamHandlerFactory) field.get(null);
-      field.set(null, null);
-      DelegatingUrlStreamHandlerFactory.appendFactory(oldFactory);
-      field.set(null, DelegatingUrlStreamHandlerFactory.INSTANCE);
-      Utils.setModule(old, getClass());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    // End of don't touch here
-    // Add Quilt's FileSystemProviders.
-    try {
-      var FSPC = FileSystemProvider.class;
-      var old = Utils.setModule(FSPC.getModule(), getClass());
-      var installedProviders = FSPC.getDeclaredField("installedProviders");
-      installedProviders.setAccessible(true);
-      var val = (List<FileSystemProvider>) installedProviders.get(null);
-      var newval = new ArrayList<>(val);
-      newval.removeIf(i -> i.getClass().getName().contains("Quilt"));
-      newval.add(new QuiltMemoryFileSystemProvider());
-      newval.add(new QuiltJoinedFileSystemProvider());
-      newval.add(new QuiltUnifiedFileSystemProvider());
-      newval.add(new QuiltZipFileSystemProvider());
-      installedProviders.set(null, Collections.unmodifiableList(newval));
-      Utils.setModule(old, getClass());
-    } catch (NoSuchFieldException
-        | SecurityException
-        | IllegalArgumentException
-        | IllegalAccessException e) {
-      throw new RuntimeException(e);
-    }
-    provider = new PillowGameProvider();
-    Log.init(new Log4jLogHandler(), true);
-    // Maybe tomorrow's Pillow Loader uses this?
-    provider.locateGame(this, new String[0]);
-    Log.info(
-        LogCategory.GAME_PROVIDER,
-        "Loading %s %s with Quilt Loader %s",
-        provider.getGameName(),
-        provider.getRawGameVersion(),
-        QuiltLoaderImpl.VERSION);
-    provider.initialize(this);
-    // It's time for Quilt!
-    QuiltLoaderImpl loader = QuiltLoaderImpl.INSTANCE;
-    loader.setGameProvider(provider);
-    loader.load();
-    loader.freeze();
-    QuiltConfigImpl.init();
-  }
+	@Override
+	@SuppressWarnings("unchecked")
+	public void initialize(IEnvironment environment) {
+		setProperties(new HashMap<>());
+		setupUncaughtExceptionHandler();
+		// Don't touch here
+		// Reload URLStreamHandlerFactory(s).
+		try {
+			var old = Utils.setModule(URL.class.getModule(), getClass());
+			var field = URL.class.getDeclaredField("factory");
+			field.setAccessible(true);
+			var oldFactory = (URLStreamHandlerFactory) field.get(null);
+			field.set(null, null);
+			DelegatingUrlStreamHandlerFactory.appendFactory(oldFactory);
+			field.set(null, DelegatingUrlStreamHandlerFactory.INSTANCE);
+			Utils.setModule(old, getClass());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		// End of don't touch here
+		// Add Quilt's FileSystemProviders.
+		try {
+			var FSPC = FileSystemProvider.class;
+			var old = Utils.setModule(FSPC.getModule(), getClass());
+			var installedProviders = FSPC.getDeclaredField("installedProviders");
+			installedProviders.setAccessible(true);
+			var val = (List<FileSystemProvider>) installedProviders.get(null);
+			var newval = new ArrayList<>(val);
+			newval.removeIf(i -> i.getClass().getName().contains("Quilt"));
+			newval.add(new QuiltMemoryFileSystemProvider());
+			newval.add(new QuiltJoinedFileSystemProvider());
+			newval.add(new QuiltUnifiedFileSystemProvider());
+			newval.add(new QuiltZipFileSystemProvider());
+			installedProviders.set(null, Collections.unmodifiableList(newval));
+			Utils.setModule(old, getClass());
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+		provider = new PillowGameProvider();
+		Log.init(new Log4jLogHandler(), true);
+		// Maybe tomorrow's Pillow Loader uses this?
+		provider.locateGame(this, new String[0]);
+		Log.info(LogCategory.GAME_PROVIDER, "Loading %s %s with Quilt Loader %s", provider.getGameName(),
+				provider.getRawGameVersion(), QuiltLoaderImpl.VERSION);
+		provider.initialize(this);
+		// It's time for Quilt!
+		QuiltLoaderImpl loader = QuiltLoaderImpl.INSTANCE;
+		loader.setGameProvider(provider);
+		loader.load();
+		loader.freeze();
+		QuiltConfigImpl.init();
+	}
 
-  public List<Resource> beginScanning(IEnvironment environment) {
-    return List.of(new Resource(Layer.GAME, List.of(new GeneratedMixinClassesSecureJar())));
-  }
+	public List<Resource> beginScanning(IEnvironment environment) {
+		return List.of(new Resource(Layer.GAME, List.of(new GeneratedMixinClassesSecureJar())));
+	}
 
-  @Override
-  public List<Resource> completeScan(IModuleLayerManager environment) {
-    Log.debug(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
-    if (cp.isEmpty()) return List.of();
-    // We merge all Quilt mods into one module.
-    var modContents = new JarContentsBuilder().paths(cp.toArray(new Path[0])).build();
-    var modResource =
-        new Resource(
-            Layer.GAME,
-            List.of(SecureJar.from(modContents, createJarMetadata(modContents, "quiltMods"))));
-    var dfuJar =
-        SecureJar.from(
-            LibraryFinder.findPathForMaven("com.mojang", "datafixerupper", "", "", "6.0.8"));
-    var depResource = new Resource(Layer.GAME, List.of(dfuJar));
-    return List.of(modResource, depResource);
-  }
+	@Override
+	public List<Resource> completeScan(IModuleLayerManager environment) {
+		Log.debug(LogCategory.DISCOVERY, "Completing scan with classpath %s", cp);
+		if (cp.isEmpty())
+			return List.of();
+		// We merge all Quilt mods into one module.
+		var modContents = new JarContentsBuilder().paths(cp.toArray(new Path[0])).build();
+		var modResource = new Resource(Layer.GAME,
+				List.of(SecureJar.from(modContents, createJarMetadata(modContents, "quiltMods"))));
+		var dfuJar = SecureJar.from(LibraryFinder.findPathForMaven("com.mojang", "datafixerupper", "", "", "6.0.8"));
+		var depResource = new Resource(Layer.GAME, List.of(dfuJar));
+		return List.of(modResource, depResource);
+	}
 
-  @Override
-  public void onLoad(IEnvironment env, Set<String> otherServices) {}
+	@Override
+	public void onLoad(IEnvironment env, Set<String> otherServices) {
+	}
 
-  @Override
-  @SuppressWarnings("rawtypes")
-  public @NotNull List<ITransformer> transformers() {
-    return List.of(
-        Utils.getSide() == EnvType.CLIENT
-            ? new ClientEntryPointTransformer()
-            : new ServerEntryPointTransformer());
-  }
+	@Override
+	@SuppressWarnings("rawtypes")
+	public @NotNull List<ITransformer> transformers() {
+		return List.of(Utils.getSide() == EnvType.CLIENT
+				? new ClientEntryPointTransformer()
+				: new ServerEntryPointTransformer());
+	}
 
-  @Override
-  public Map.Entry<Set<String>, Supplier<Function<String, Optional<URL>>>>
-      additionalClassesLocator() {
-    return null;
-  }
+	@Override
+	public Map.Entry<Set<String>, Supplier<Function<String, Optional<URL>>>> additionalClassesLocator() {
+		return null;
+	}
 
-  public static JarMetadata createJarMetadata(JarContents contents, String name) {
-    return new SimpleJarMetadata(
-        name, "1.0.0", contents::getPackages, contents.getMetaInfServices());
-  }
+	public static JarMetadata createJarMetadata(JarContents contents, String name) {
+		return new SimpleJarMetadata(name, "1.0.0", contents::getPackages, contents.getMetaInfServices());
+	}
 
-  private GameProvider provider;
-  private final List<Path> cp = new ArrayList<>();
-  public static List<String> NO_LOAD_MODS = List.of("pillow-loader", "forge", "minecraft", "java");
+	private GameProvider provider;
+	private final List<Path> cp = new ArrayList<>();
+	public static List<String> NO_LOAD_MODS = List.of("pillow-loader", "forge", "minecraft", "java");
 
-  // QuiltLauncher start
+	// QuiltLauncher start
 
-  @Override
-  public void addToClassPath(Path path, String... allowedPrefixes) {
-    var name = Utils.extractZipPath(path);
-    try {
-      if (!name.getClass().getName().contains("Union")
-          && !name.equals(
-              Utils.extractUnionPaths(
-                      Paths.get(
-                          getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
-                  .get(0))) cp.add(path);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
-  }
+	@Override
+	public void addToClassPath(Path path, String... allowedPrefixes) {
+		var name = Utils.extractZipPath(path);
+		try {
+			if (!name.getClass().getName().contains("Union")
+					&& !name.equals(Utils
+							.extractUnionPaths(
+									Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
+							.get(0)))
+				cp.add(path);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-  @Override
-  public void setAllowedPrefixes(Path path, String... prefixes) {}
+	@Override
+	public void setAllowedPrefixes(Path path, String... prefixes) {
+	}
 
-  @Override
-  public EnvType getEnvironmentType() {
-    return Utils.getSide();
-  }
+	@Override
+	public EnvType getEnvironmentType() {
+		return Utils.getSide();
+	}
 
-  @Override
-  public boolean isClassLoaded(String name) {
-    return false;
-  }
+	@Override
+	public boolean isClassLoaded(String name) {
+		return false;
+	}
 
-  @Override
-  public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
-    return getTargetClassLoader().loadClass(name);
-  }
+	@Override
+	public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
+		return getTargetClassLoader().loadClass(name);
+	}
 
-  @Override
-  public InputStream getResourceAsStream(String name) {
-    return this.getTargetClassLoader().getResourceAsStream(name);
-  }
+	@Override
+	public InputStream getResourceAsStream(String name) {
+		return this.getTargetClassLoader().getResourceAsStream(name);
+	}
 
-  @Override
-  public ClassLoader getTargetClassLoader() {
-    // Let Quilt get the real location of itself.
-    var trace = Thread.currentThread().getStackTrace();
-    if (trace[2].getClassName().contains("ClasspathModCandidateFinder")
-        && trace[2].getMethodName().equals("findCandidates")) return new SuperHackyClassLoader();
-    return Thread.currentThread().getContextClassLoader();
-  }
+	@Override
+	public ClassLoader getTargetClassLoader() {
+		// Let Quilt get the real location of itself.
+		var trace = Thread.currentThread().getStackTrace();
+		if (trace[2].getClassName().contains("ClasspathModCandidateFinder")
+				&& trace[2].getMethodName().equals("findCandidates"))
+			return new SuperHackyClassLoader();
+		return Thread.currentThread().getContextClassLoader();
+	}
 
-  @Override
-  public byte[] getClassByteArray(String name, boolean runTransformers) {
-    return new byte[0];
-  }
+	@Override
+	public byte[] getClassByteArray(String name, boolean runTransformers) {
+		return new byte[0];
+	}
 
-  @Override
-  public Manifest getManifest(Path originPath) {
-    return null;
-  }
+	@Override
+	public Manifest getManifest(Path originPath) {
+		return null;
+	}
 
-  @Override
-  public boolean isDevelopment() {
-    var trace = Thread.currentThread().getStackTrace();
-    return trace[2].getClassName().contains("ClasspathModCandidateFinder")
-        || trace[4].getMethodName().equals("scan0");
-  }
+	@Override
+	public boolean isDevelopment() {
+		var trace = Thread.currentThread().getStackTrace();
+		return trace[2].getClassName().contains("ClasspathModCandidateFinder")
+				|| trace[4].getMethodName().equals("scan0");
+	}
 
-  @Override
-  public String getEntrypoint() {
-    return provider.getEntrypoint();
-  }
+	@Override
+	public String getEntrypoint() {
+		return provider.getEntrypoint();
+	}
 
-  @Override
-  public String getTargetNamespace() {
-    return "official";
-  }
+	@Override
+	public String getTargetNamespace() {
+		return "srg";
+	}
 
-  @Override
-  public List<Path> getClassPath() {
-    return null;
-  }
+	@Override
+	public List<Path> getClassPath() {
+		return null;
+	}
 
-  @Override
-  public void addToClassPath(Path path, ModContainer mod, URL origin, String... allowedPrefixes) {
-    if (NO_LOAD_MODS.contains(mod.metadata().id())) return;
-    addToClassPath(path, allowedPrefixes);
-  }
+	@Override
+	public void addToClassPath(Path path, ModContainer mod, URL origin, String... allowedPrefixes) {
+		if (NO_LOAD_MODS.contains(mod.metadata().id()))
+			return;
+		addToClassPath(path, allowedPrefixes);
+	}
 
-  @Override
-  public void setTransformCache(URL insideTransformCache) {}
+	@Override
+	public void setTransformCache(URL insideTransformCache) {
+	}
 
-  @Override
-  public void hideParentUrl(URL hidden) {}
+	@Override
+	public void hideParentUrl(URL hidden) {
+	}
 
-  @Override
-  public void hideParentPath(Path obf) {}
+	@Override
+	public void hideParentPath(Path obf) {
+	}
 
-  @Override
-  public void validateGameClassLoader(Object gameInstance) {}
+	@Override
+	public void validateGameClassLoader(Object gameInstance) {
+	}
 
-  @Override
-  public URL getResourceURL(String name) {
-    return getTargetClassLoader().getResource(name);
-  }
+	@Override
+	public URL getResourceURL(String name) {
+		return getTargetClassLoader().getResource(name);
+	}
 
-  @Override
-  public ClassLoader getClassLoader(ModContainer mod) {
-    return getTargetClassLoader();
-  }
+	@Override
+	public ClassLoader getClassLoader(ModContainer mod) {
+		return getTargetClassLoader();
+	}
 
-  @Override
-  public void setHiddenClasses(Set<String> classes) {
-    // TODO Error when load these classes.
-  }
+	@Override
+	public void setHiddenClasses(Set<String> classes) {
+		// TODO Error when load these classes.
+	}
 
-  private final GameTransformer gameTransformer =
-      new GameTransformer() {
-        public byte[] transform(String className) {
-          return null;
-        }
-        ;
-      };
+	private final GameTransformer gameTransformer = new GameTransformer() {
+		public byte[] transform(String className) {
+			return null;
+		};
+	};
 
-  @Override
-  public GameTransformer getEntrypointTransformer() {
-    return this.gameTransformer;
-  }
+	@Override
+	public GameTransformer getEntrypointTransformer() {
+		return this.gameTransformer;
+	}
 }

@@ -32,21 +32,20 @@ import net.pillowmc.pillow.asm.PillowNamingContext;
 import org.quiltmc.loader.api.ModContainer;
 
 public final class ModJarProcessor {
-  public static final Set<String> classes = new HashSet<>();
+	public static final Set<String> classes = new HashSet<>();
 
-  private ModJarProcessor() {}
+	private ModJarProcessor() {
+	}
 
-  public static void scanModJar(ModContainer modFile) throws IOException {
-    var i = modFile.rootPath();
-    Files.walk(i)
-        .forEach(
-            path -> {
-              path = path.toAbsolutePath();
-              if (path.toString().endsWith(".class")) {
-                String name = path.toString();
-                if (!PillowNamingContext.isUserDev)
-                  classes.add(name.substring(1, name.length() - 6).replace("/", "."));
-              }
-            });
-  }
+	public static void scanModJar(ModContainer modFile) throws IOException {
+		var i = modFile.rootPath();
+		Files.walk(i).forEach(path -> {
+			path = path.toAbsolutePath();
+			if (path.toString().endsWith(".class")) {
+				String name = path.toString();
+				if (!PillowNamingContext.isUserDev)
+					classes.add(name.substring(1, name.length() - 6).replace("/", "."));
+			}
+		});
+	}
 }

@@ -41,54 +41,43 @@ import org.objectweb.asm.tree.MethodNode;
 import org.quiltmc.loader.impl.game.minecraft.Hooks;
 
 public class ServerEntryPointTransformer implements ITransformer<MethodNode> {
-  @Override
-  public @NotNull MethodNode transform(MethodNode input, ITransformerVotingContext context) {
-    var newList = new InsnList();
-    newList.add(
-        new MethodInsnNode(
-            Opcodes.INVOKESTATIC, Utils.class.getName().replace(".", "/"), "preLaunch", "()V"));
-    input.instructions.insertBefore(input.instructions.getFirst(), newList);
-    // before server.properties
-    ListIterator<AbstractInsnNode> it = input.instructions.iterator();
-    while (it.hasNext()) {
-      AbstractInsnNode ins = it.next();
-      if (ins instanceof LdcInsnNode lin) {
-        if ((lin.cst.equals("server.properties"))) {
-          it.previous();
-          it.add(new InsnNode(Opcodes.ACONST_NULL));
-          it.add(new InsnNode(Opcodes.ACONST_NULL));
-          it.add(
-              new MethodInsnNode(
-                  Opcodes.INVOKESTATIC,
-                  Hooks.INTERNAL_NAME,
-                  "startServer",
-                  "(Ljava/io/File;Ljava/lang/Object;)V"));
-          it.next();
-        }
-      } else if (ins instanceof MethodInsnNode min) {
-        if (min.owner.equals("net/minecraft/server/dedicated/DedicatedServer")
-            && min.name.equals("<init>")) {
-          it.add(new InsnNode(Opcodes.DUP));
-          it.add(
-              new MethodInsnNode(
-                  Opcodes.INVOKESTATIC,
-                  Hooks.INTERNAL_NAME,
-                  "setGameInstance",
-                  "(Ljava/lang/Object;)V"));
-        }
-      }
-    }
-    return input;
-  }
+	@Override
+	public @NotNull MethodNode transform(MethodNode input, ITransformerVotingContext context) {
+		var newList = new InsnList();
+		newList.add(
+				new MethodInsnNode(Opcodes.INVOKESTATIC, Utils.class.getName().replace(".", "/"), "preLaunch", "()V"));
+		input.instructions.insertBefore(input.instructions.getFirst(), newList);
+		// before server.properties
+		ListIterator<AbstractInsnNode> it = input.instructions.iterator();
+		while (it.hasNext()) {
+			AbstractInsnNode ins = it.next();
+			if (ins instanceof LdcInsnNode lin) {
+				if ((lin.cst.equals("server.properties"))) {
+					it.previous();
+					it.add(new InsnNode(Opcodes.ACONST_NULL));
+					it.add(new InsnNode(Opcodes.ACONST_NULL));
+					it.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Hooks.INTERNAL_NAME, "startServer",
+							"(Ljava/io/File;Ljava/lang/Object;)V"));
+					it.next();
+				}
+			} else if (ins instanceof MethodInsnNode min) {
+				if (min.owner.equals("net/minecraft/server/dedicated/DedicatedServer") && min.name.equals("<init>")) {
+					it.add(new InsnNode(Opcodes.DUP));
+					it.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Hooks.INTERNAL_NAME, "setGameInstance",
+							"(Ljava/lang/Object;)V"));
+				}
+			}
+		}
+		return input;
+	}
 
-  @Override
-  public @NotNull TransformerVoteResult castVote(ITransformerVotingContext context) {
-    return TransformerVoteResult.YES;
-  }
+	@Override
+	public @NotNull TransformerVoteResult castVote(ITransformerVotingContext context) {
+		return TransformerVoteResult.YES;
+	}
 
-  @Override
-  public @NotNull Set<Target> targets() {
-    return Set.of(
-        Target.targetMethod("net.minecraft.server.Main", "main", "([Ljava/lang/String)V"));
-  }
+	@Override
+	public @NotNull Set<Target> targets() {
+		return Set.of(Target.targetMethod("net.minecraft.server.Main", "main", "([Ljava/lang/String)V"));
+	}
 }

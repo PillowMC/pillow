@@ -39,113 +39,113 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 public class EmptySecureJar implements SecureJar {
-  private String name;
+	private String name;
 
-  private class EmptyModuleDataProvider implements ModuleDataProvider {
-    private ModuleDescriptor descriptor;
+	private class EmptyModuleDataProvider implements ModuleDataProvider {
+		private ModuleDescriptor descriptor;
 
-    @Override
-    public String name() {
-      return EmptySecureJar.this.name;
-    }
+		@Override
+		public String name() {
+			return EmptySecureJar.this.name;
+		}
 
-    @Override
-    public ModuleDescriptor descriptor() {
-      if (descriptor == null) {
-        descriptor = ModuleDescriptor.newAutomaticModule(EmptySecureJar.this.name).build();
-      }
-      return descriptor;
-    }
+		@Override
+		public ModuleDescriptor descriptor() {
+			if (descriptor == null) {
+				descriptor = ModuleDescriptor.newAutomaticModule(EmptySecureJar.this.name).build();
+			}
+			return descriptor;
+		}
 
-    @Override
-    public URI uri() {
-      return uncheck(() -> new URI("file:///~nonexistent"));
-    }
+		@Override
+		public URI uri() {
+			return uncheck(() -> new URI("file:///~nonexistent"));
+		}
 
-    @Override
-    public Optional<URI> findFile(String name) {
-      return Optional.empty();
-    }
+		@Override
+		public Optional<URI> findFile(String name) {
+			return Optional.empty();
+		}
 
-    @Override
-    public Optional<InputStream> open(String name) {
-      return Optional.empty();
-    }
+		@Override
+		public Optional<InputStream> open(String name) {
+			return Optional.empty();
+		}
 
-    @Override
-    public Manifest getManifest() {
-      return new Manifest();
-    }
+		@Override
+		public Manifest getManifest() {
+			return new Manifest();
+		}
 
-    @Override
-    public CodeSigner[] verifyAndGetSigners(String cname, byte[] bytes) {
-      return new CodeSigner[0];
-    }
-  }
+		@Override
+		public CodeSigner[] verifyAndGetSigners(String cname, byte[] bytes) {
+			return new CodeSigner[0];
+		}
+	}
 
-  public EmptySecureJar(String name) {
-    this.name = name;
-  }
+	public EmptySecureJar(String name) {
+		this.name = name;
+	}
 
-  private final ModuleDataProvider moduleDataProvider = new EmptyModuleDataProvider();
+	private final ModuleDataProvider moduleDataProvider = new EmptyModuleDataProvider();
 
-  @Override
-  public ModuleDataProvider moduleDataProvider() {
-    return moduleDataProvider;
-  }
+	@Override
+	public ModuleDataProvider moduleDataProvider() {
+		return moduleDataProvider;
+	}
 
-  @Override
-  public Path getPrimaryPath() {
-    return Path.of(moduleDataProvider().uri());
-  }
+	@Override
+	public Path getPrimaryPath() {
+		return Path.of(moduleDataProvider().uri());
+	}
 
-  @Override
-  public CodeSigner[] getManifestSigners() {
-    return new CodeSigner[0];
-  }
+	@Override
+	public CodeSigner[] getManifestSigners() {
+		return new CodeSigner[0];
+	}
 
-  @Override
-  public Status verifyPath(Path path) {
-    return Status.NONE;
-  }
+	@Override
+	public Status verifyPath(Path path) {
+		return Status.NONE;
+	}
 
-  @Override
-  public Status getFileStatus(String name) {
-    return Status.NONE;
-  }
+	@Override
+	public Status getFileStatus(String name) {
+		return Status.NONE;
+	}
 
-  @Override
-  public Attributes getTrustedManifestEntries(String name) {
-    return new Attributes();
-  }
+	@Override
+	public Attributes getTrustedManifestEntries(String name) {
+		return new Attributes();
+	}
 
-  @Override
-  public boolean hasSecurityData() {
-    return false;
-  }
+	@Override
+	public boolean hasSecurityData() {
+		return false;
+	}
 
-  @Override
-  public Set<String> getPackages() {
-    return moduleDataProvider().descriptor().packages();
-  }
+	@Override
+	public Set<String> getPackages() {
+		return moduleDataProvider().descriptor().packages();
+	}
 
-  @Override
-  public List<Provider> getProviders() {
-    return List.of();
-  }
+	@Override
+	public List<Provider> getProviders() {
+		return List.of();
+	}
 
-  @Override
-  public String name() {
-    return moduleDataProvider().name();
-  }
+	@Override
+	public String name() {
+		return moduleDataProvider().name();
+	}
 
-  @Override
-  public Path getPath(String first, String... rest) {
-    return getPrimaryPath();
-  }
+	@Override
+	public Path getPath(String first, String... rest) {
+		return getPrimaryPath();
+	}
 
-  @Override
-  public Path getRootPath() {
-    return getPrimaryPath();
-  }
+	@Override
+	public Path getRootPath() {
+		return getPrimaryPath();
+	}
 }

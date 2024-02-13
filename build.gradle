@@ -36,15 +36,12 @@ sourceSets {
 
 spotless {
   java {
-    // Use the default importOrder configuration
     importOrder()
     endWithNewline()
-    indentWithSpaces()
     removeUnusedImports()
-    // Cleanthat will refactor your code, but it may break your style: apply it before your formatter
     cleanthat()
-    googleJavaFormat()
-    formatAnnotations()  // fixes formatting of type annotations, see below
+    eclipse()
+    formatAnnotations()
   }
 }
 

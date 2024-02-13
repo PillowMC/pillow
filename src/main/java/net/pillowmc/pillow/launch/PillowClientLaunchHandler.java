@@ -32,14 +32,13 @@ import net.neoforged.fml.loading.targets.CommonClientLaunchHandler;
 import org.quiltmc.loader.api.QuiltLoader;
 
 public class PillowClientLaunchHandler extends CommonClientLaunchHandler {
-  @Override
-  public String name() {
-    return "pillowclient";
-  }
+	@Override
+	public String name() {
+		return "pillowclient";
+	}
 
-  @Override
-  protected void processMCStream(
-      VersionInfo versionInfo, Builder<Path> mc, Builder<List<Path>> mods) {
-    mc.accept(QuiltLoader.getModContainer("minecraft").get().rootPath());
-  }
+	@Override
+	protected void processMCStream(VersionInfo versionInfo, Builder<Path> mc, Builder<List<Path>> mods) {
+		mc.accept(QuiltLoader.getModContainer("minecraft").get().rootPath());
+	}
 }
