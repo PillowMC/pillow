@@ -174,12 +174,26 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 		if (cp.isEmpty())
 			return List.of();
 		// We merge all Quilt mods into one module.
-		var modContents = new JarContentsBuilder().paths(cp.toArray(new Path[0])).build();
-		var modResource = new Resource(Layer.GAME,
-				List.of(SecureJar.from(modContents, createJarMetadata(modContents, "quiltMods"))));
+		var modContents = new JarContentsBuilder().paths(cp.toArray(new Path[0])).pathFilter(this::filterPackages)
+				.build();
+		var modJar = SecureJar.from(modContents, createJarMetadata(modContents, "quiltMods"));
+		var modResource = new Resource(Layer.GAME, List.of(modJar));
 		var dfuJar = SecureJar.from(LibraryFinder.findPathForMaven("com.mojang", "datafixerupper", "", "", "6.0.8"));
 		var depResource = new Resource(Layer.GAME, List.of(dfuJar));
 		return List.of(modResource, depResource);
+	}
+
+	// NeoForge offers some libraries that Quilt doesn't offer.
+	// Some of the mods includes these libraries.
+	// So we remove these packages from quiltMods to make the module system happy.
+	// But... Who includes LWJGL??? IDK but without this in NO_LOAD_PACKAGES,
+	// Replay Mod will crash.
+	// However, I didn't found org/lwjgl in Replay Mod.
+	public static Set<String> NO_LOAD_PACKAGES = Set.of("javax/annotation", "com/electronwill/nightconfig",
+			"org/openjdk/nashorn", "org/apache/maven/artifact", "org/apache/maven/repository", "org/lwjgl");
+
+	private boolean filterPackages(String entry, String basePath) {
+		return !NO_LOAD_PACKAGES.stream().anyMatch((pack) -> entry.startsWith(pack));
 	}
 
 	@Override
@@ -205,7 +219,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
 	private GameProvider provider;
 	private final List<Path> cp = new ArrayList<>();
-	public static List<String> NO_LOAD_MODS = List.of("pillow-loader", "forge", "minecraft", "java");
+	public static Set<String> NO_LOAD_MODS = Set.of("pillow-loader", "forge", "minecraft", "java", "night-config");
 
 	// QuiltLauncher start
 
