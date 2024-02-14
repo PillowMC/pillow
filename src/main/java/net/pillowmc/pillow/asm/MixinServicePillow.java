@@ -79,6 +79,6 @@ public class MixinServicePillow extends MixinServiceModLauncher {
 				}
 			}
 		}
-		return QuiltLauncherBase.getLauncher().getResourceAsStream(name);
+		return super.getResourceAsStream(name);
 	}
 }

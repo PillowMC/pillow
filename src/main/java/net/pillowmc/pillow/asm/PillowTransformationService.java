@@ -24,10 +24,13 @@
 
 package net.pillowmc.pillow.asm;
 
+import static cpw.mods.modlauncher.api.LamdbaExceptionUtils.uncheck;
+
 import cpw.mods.jarhandling.JarContents;
 import cpw.mods.jarhandling.JarContentsBuilder;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
+import cpw.mods.jarhandling.VirtualJar;
 import cpw.mods.jarhandling.impl.SimpleJarMetadata;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
@@ -35,13 +38,10 @@ import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import io.github.steelwoolmc.mixintransmog.GeneratedMixinClassesSecureJar;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,6 +74,7 @@ import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.plugin.gui.I18n;
 import org.quiltmc.loader.impl.util.log.Log;
 import org.quiltmc.loader.impl.util.log.LogCategory;
+import org.spongepowered.asm.util.Constants;
 
 public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
 	@SuppressWarnings("unchecked")
@@ -151,6 +152,8 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 		Log.info(LogCategory.GAME_PROVIDER, "Loading %s %s with Quilt Loader %s", provider.getGameName(),
 				provider.getRawGameVersion(), QuiltLoaderImpl.VERSION);
 		provider.initialize(this);
+		// Copy legacyClassPath to java.class.path for QuiltForkComms
+		System.setProperty("java.class.path", System.getProperty("legacyClassPath"));
 		// It's time for Quilt!
 		QuiltLoaderImpl loader = QuiltLoaderImpl.INSTANCE;
 		loader.setGameProvider(provider);
@@ -160,7 +163,9 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 	}
 
 	public List<Resource> beginScanning(IEnvironment environment) {
-		return List.of(new Resource(Layer.GAME, List.of(new GeneratedMixinClassesSecureJar())));
+		return List.of(new Resource(Layer.GAME, List.of(new VirtualJar("mixin_generated",
+				Path.of(uncheck(() -> Constants.class.getProtectionDomain().getCodeSource().getLocation().toURI())),
+				Constants.SYNTHETIC_PACKAGE, Constants.SYNTHETIC_PACKAGE + ".args"))));
 	}
 
 	@Override
@@ -206,17 +211,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
 	@Override
 	public void addToClassPath(Path path, String... allowedPrefixes) {
-		var name = Utils.extractZipPath(path);
-		try {
-			if (!name.getClass().getName().contains("Union")
-					&& !name.equals(Utils
-							.extractUnionPaths(
-									Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
-							.get(0)))
-				cp.add(path);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+		cp.add(path);
 	}
 
 	@Override
@@ -245,7 +240,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
 	@Override
 	public ClassLoader getTargetClassLoader() {
-		// Let Quilt get the real location of itself.
+		// Let Quilt get the real location of itself, and Pillow.
 		var trace = Thread.currentThread().getStackTrace();
 		if (trace[2].getClassName().contains("ClasspathModCandidateFinder")
 				&& trace[2].getMethodName().equals("findCandidates"))

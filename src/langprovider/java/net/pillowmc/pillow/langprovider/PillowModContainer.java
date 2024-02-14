@@ -40,7 +40,10 @@ public class PillowModContainer extends net.neoforged.fml.ModContainer {
 
 	@Override
 	public boolean matches(Object mod) {
-		return mod == container;
+		if (mod instanceof ModContainer thatContainer) {
+			return thatContainer.metadata().id().equals(this.container.metadata().id());
+		}
+		return false;
 	}
 
 	@Override
@@ -50,6 +53,6 @@ public class PillowModContainer extends net.neoforged.fml.ModContainer {
 
 	@Override
 	public @Nullable IEventBus getEventBus() {
-		return new DummyEventBus();
+		return null;
 	}
 }

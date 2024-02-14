@@ -29,7 +29,6 @@ import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import java.util.ListIterator;
 import java.util.Set;
-import net.pillowmc.pillow.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
@@ -38,13 +37,6 @@ import org.quiltmc.loader.impl.game.minecraft.Hooks;
 public class ClientEntryPointTransformer implements ITransformer<MethodNode> {
 	@Override
 	public @NotNull MethodNode transform(MethodNode input, ITransformerVotingContext context) {
-		if (input.name.equals("main")) {
-			var newList = new InsnList();
-			newList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Utils.class.getName().replace(".", "/"), "preLaunch",
-					"()V"));
-			input.instructions.insertBefore(input.instructions.getFirst(), newList);
-			return input;
-		}
 		// after initBackendSystem
 		ListIterator<AbstractInsnNode> it = input.instructions.iterator();
 		FieldInsnNode insn = null;
@@ -74,9 +66,7 @@ public class ClientEntryPointTransformer implements ITransformer<MethodNode> {
 
 	@Override
 	public @NotNull Set<Target> targets() {
-		return Set.of(
-				Target.targetMethod("net.minecraft.client.Minecraft", "<init>",
-						"(Lnet/minecraft/client/main/GameConfig;)V"),
-				Target.targetMethod("net.minecraft.client.main.Main", "main", "([Ljava/lang/String;)V"));
+		return Set.of(Target.targetMethod("net.minecraft.client.Minecraft", "<init>",
+				"(Lnet/minecraft/client/main/GameConfig;)V"));
 	}
 }

@@ -25,6 +25,7 @@
 package net.pillowmc.pillow.mods;
 
 import com.electronwill.nightconfig.core.Config;
+import cpw.mods.jarhandling.VirtualJar;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
@@ -63,7 +64,13 @@ public class PillowModLocator implements IModLocator {
 		} catch (IOException e) {
 			Log.error(PillowLogCategory.SCAN, "Error when scanning mod" + i.metadata().name(), e);
 		}
-		return new ModFile(new EmptySecureJar(i.metadata().id().replace("-", "_")), this,
+		Path modSource;
+		if (i.getSourcePaths().isEmpty() || i.getSourcePaths().get(0).isEmpty()) {
+			modSource = Path.of("/~nonexistent");
+		} else {
+			modSource = i.getSourcePaths().get(0).get(0);
+		}
+		return new ModFile(new VirtualJar(i.metadata().id().replace("-", "_"), modSource), this,
 				file -> createModFileInfo((ModFile) file, i));
 	}
 

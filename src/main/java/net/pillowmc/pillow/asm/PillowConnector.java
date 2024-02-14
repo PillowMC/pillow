@@ -65,17 +65,6 @@ public class PillowConnector implements IMixinConnector {
 		// QuiltMixinBootstrap.init
 		System.setProperty("mixin.env.remapRefMap", "true");
 		try {
-			// RemapperAdapter remapper = new
-			// RemapperAdapter(RemapperUtils.create(mappings,
-			// PillowNamingContext.fromName, PillowNamingContext.toName)){
-			// @Override
-			// public String mapMethodName(String owner, String name, String desc) {
-			// if(name.startsWith("<")){
-			// return name;
-			// }
-			// return super.mapMethodName(owner, name, desc);
-			// }
-			// };
 			MixinIntermediaryDevRemapper remapper = new MixinIntermediaryDevRemapper(mappings,
 					PillowNamingContext.fromName, PillowNamingContext.toName);
 			MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);

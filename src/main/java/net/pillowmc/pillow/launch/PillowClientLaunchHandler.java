@@ -30,11 +30,18 @@ import java.util.stream.Stream.Builder;
 import net.neoforged.fml.loading.VersionInfo;
 import net.neoforged.fml.loading.targets.CommonClientLaunchHandler;
 import org.quiltmc.loader.api.QuiltLoader;
+import org.quiltmc.loader.impl.QuiltLoaderImpl;
 
 public class PillowClientLaunchHandler extends CommonClientLaunchHandler {
 	@Override
 	public String name() {
 		return "pillowclient";
+	}
+
+	@Override
+	protected String[] preLaunch(String[] arguments, ModuleLayer layer) {
+		QuiltLoaderImpl.INSTANCE.invokePreLaunch();
+		return super.preLaunch(arguments, layer);
 	}
 
 	@Override
