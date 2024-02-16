@@ -9,9 +9,8 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ dev ]
-  pull_request:
-    branches: [ dev ]
+    tags:
+      - 'v**'
 
 jobs:
   build:
@@ -27,15 +26,8 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build and publish with Gradle
-      uses: gradle/gradle-build-action@v2.3.3
+      uses: gradle/gradle-build-action@v3
       with:
         arguments: build publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.0.0
-      with:
-        # Artifact name
-        name: Artifact
-        # A file, directory or wildcard pattern that describes what to upload
-        path: build/libs/*.jar
