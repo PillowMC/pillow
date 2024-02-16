@@ -10,7 +10,7 @@ name: Java CI with Gradle
 on:
   push:
     tags:
-      - 'v**'
+      - 'v*'
 
 jobs:
   build:
