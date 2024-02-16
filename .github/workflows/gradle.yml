@@ -7,10 +7,7 @@
 
 name: Java CI with Gradle
 
-on:
-  push:
-    tags:
-      - 'v*'
+on: create
 
 jobs:
   build:
