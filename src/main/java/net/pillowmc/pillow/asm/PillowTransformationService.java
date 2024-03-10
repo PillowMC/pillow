@@ -24,13 +24,10 @@
 
 package net.pillowmc.pillow.asm;
 
-import static cpw.mods.modlauncher.api.LamdbaExceptionUtils.uncheck;
-
 import cpw.mods.jarhandling.JarContents;
 import cpw.mods.jarhandling.JarContentsBuilder;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
-import cpw.mods.jarhandling.VirtualJar;
 import cpw.mods.jarhandling.impl.SimpleJarMetadata;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
@@ -74,7 +71,6 @@ import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.plugin.gui.I18n;
 import org.quiltmc.loader.impl.util.log.Log;
 import org.quiltmc.loader.impl.util.log.LogCategory;
-import org.spongepowered.asm.util.Constants;
 
 public class PillowTransformationService extends QuiltLauncherBase implements ITransformationService {
 	@SuppressWarnings("unchecked")
@@ -160,12 +156,6 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 		loader.load();
 		loader.freeze();
 		QuiltConfigImpl.init();
-	}
-
-	public List<Resource> beginScanning(IEnvironment environment) {
-		return List.of(new Resource(Layer.GAME, List.of(new VirtualJar("mixin_generated",
-				Path.of(uncheck(() -> Constants.class.getProtectionDomain().getCodeSource().getLocation().toURI())),
-				Constants.SYNTHETIC_PACKAGE, Constants.SYNTHETIC_PACKAGE + ".args"))));
 	}
 
 	@Override

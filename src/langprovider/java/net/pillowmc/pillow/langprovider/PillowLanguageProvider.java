@@ -26,8 +26,6 @@ package net.pillowmc.pillow.langprovider;
 
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import net.neoforged.neoforgespi.language.ILifecycleEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.IModLanguageProvider;
 import net.neoforged.neoforgespi.language.IModLanguageProvider.IModLanguageLoader;
@@ -56,9 +54,5 @@ public class PillowLanguageProvider implements IModLanguageProvider, IModLanguag
 	@Override
 	public Consumer<ModFileScanData> getFileVisitor() {
 		return d -> d.addLanguageLoader(Map.of(d.getIModInfoData().get(0).getMods().get(0).getModId(), this));
-	}
-
-	@Override
-	public <R extends ILifecycleEvent<R>> void consumeLifecycleEvent(Supplier<R> consumeEvent) {
 	}
 }
