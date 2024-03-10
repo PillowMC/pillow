@@ -35,14 +35,17 @@ import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +54,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.jar.Manifest;
 import net.fabricmc.api.EnvType;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.LibraryFinder;
 import net.pillowmc.pillow.PillowGameProvider;
 import net.pillowmc.pillow.Utils;
@@ -209,7 +213,22 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
 	private GameProvider provider;
 	private final List<Path> cp = new ArrayList<>();
-	public static Set<String> NO_LOAD_MODS = Set.of("pillow-loader", "forge", "minecraft", "java", "night-config");
+	public static Set<String> NO_LOAD_MODS = loadNoLoadMods();
+
+	private static Set<String> loadNoLoadMods() {
+		try {
+			var file = FMLPaths.CONFIGDIR.get().resolve("pillow-loader-noload.txt");
+			if (file.toFile().exists()) {
+				return new HashSet<>(Files.readAllLines(file));
+			}
+			var defaults = Set.of("pillow-loader", "forge", "minecraft", "java", "night-config",
+					"org_antlr_antlr4-runtime");
+			Files.writeString(file, String.join("\n", defaults));
+			return defaults;
+		} catch (IOException e) {
+			throw new RuntimeException("Can't read pillow-loader-noload.txt!", e);
+		}
+	}
 
 	// QuiltLauncher start
 
