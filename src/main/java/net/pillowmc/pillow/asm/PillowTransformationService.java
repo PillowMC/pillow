@@ -183,8 +183,9 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 	// But... Who includes LWJGL??? IDK but without this in NO_LOAD_PACKAGES,
 	// Replay Mod will crash.
 	// However, I didn't found org/lwjgl in Replay Mod.
-	public static Set<String> NO_LOAD_PACKAGES = Set.of("javax/annotation", "com/electronwill/nightconfig",
-			"org/openjdk/nashorn", "org/apache/maven/artifact", "org/apache/maven/repository", "org/lwjgl");
+	public static Set<String> NO_LOAD_PACKAGES = loadNoLoads("packages", "javax/annotation",
+			"com/electronwill/nightconfig", "org/openjdk/nashorn", "org/apache/maven/artifact",
+			"org/apache/maven/repository", "org/lwjgl", "org/antlr");
 
 	private boolean filterPackages(String entry, String basePath) {
 		return !NO_LOAD_PACKAGES.stream().anyMatch((pack) -> entry.startsWith(pack));
@@ -213,20 +214,19 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
 	private GameProvider provider;
 	private final List<Path> cp = new ArrayList<>();
-	public static Set<String> NO_LOAD_MODS = loadNoLoadMods();
+	public static Set<String> NO_LOAD_MODS = loadNoLoads("mods", "pillow-loader", "forge", "minecraft", "java",
+			"night-config", "org_antlr_antlr4-runtime");
 
-	private static Set<String> loadNoLoadMods() {
+	private static Set<String> loadNoLoads(String name, String... defaults) {
 		try {
-			var file = FMLPaths.CONFIGDIR.get().resolve("pillow-loader-noload.txt");
+			var file = FMLPaths.CONFIGDIR.get().resolve("pillow-loader-noload" + name + ".txt");
 			if (file.toFile().exists()) {
 				return new HashSet<>(Files.readAllLines(file));
 			}
-			var defaults = Set.of("pillow-loader", "forge", "minecraft", "java", "night-config",
-					"org_antlr_antlr4-runtime");
 			Files.writeString(file, String.join("\n", defaults));
-			return defaults;
+			return Set.of(defaults);
 		} catch (IOException e) {
-			throw new RuntimeException("Can't read pillow-loader-noload.txt!", e);
+			throw new RuntimeException("Can't read Pillow Loader noload files!", e);
 		}
 	}
 
