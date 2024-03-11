@@ -8,7 +8,7 @@ plugins {
 }
 
 
-version = "0.2.3"
+version = "0.2.4"
 group = 'net.pillowmc' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'pillow'
 
