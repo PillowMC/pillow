@@ -26,7 +26,6 @@ package net.pillowmc.pillow.mods;
 
 import com.electronwill.nightconfig.core.Config;
 import cpw.mods.jarhandling.VirtualJar;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.List;
@@ -39,13 +38,10 @@ import net.neoforged.fml.loading.moddiscovery.NightConfigWrapper;
 import net.neoforged.neoforgespi.language.IModFileInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.IModLocator;
-import net.pillowmc.pillow.ModJarProcessor;
-import net.pillowmc.pillow.PillowLogCategory;
 import net.pillowmc.pillow.asm.PillowTransformationService;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.api.ModLicense;
 import org.quiltmc.loader.api.QuiltLoader;
-import org.quiltmc.loader.impl.util.log.Log;
 
 public class PillowModLocator implements IModLocator {
 	private final String QUILT_VERSION = QuiltLoader.getModContainer("quilt_loader").orElseThrow().metadata().version()
@@ -59,11 +55,6 @@ public class PillowModLocator implements IModLocator {
 	}
 
 	private IModFile createModFile(ModContainer i) {
-		try {
-			ModJarProcessor.scanModJar(i);
-		} catch (IOException e) {
-			Log.error(PillowLogCategory.SCAN, "Error when scanning mod" + i.metadata().name(), e);
-		}
 		Path modSource;
 		if (i.getSourcePaths().isEmpty() || i.getSourcePaths().get(0).isEmpty()) {
 			modSource = Path.of("/~nonexistent");

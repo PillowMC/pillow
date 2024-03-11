@@ -35,8 +35,10 @@ import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 import java.nio.file.Files;
@@ -226,7 +228,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 			Files.writeString(file, String.join("\n", defaults));
 			return Set.of(defaults);
 		} catch (IOException e) {
-			throw new RuntimeException("Can't read Pillow Loader noload files!", e);
+			throw new UncheckedIOException("Can't read Pillow Loader noload files!", e);
 		}
 	}
 
@@ -300,7 +302,7 @@ public class PillowTransformationService extends QuiltLauncherBase implements IT
 
 	@Override
 	public List<Path> getClassPath() {
-		return null;
+		return List.of(System.getProperty("legacyClassPath").split(File.pathSeparator)).stream().map(Path::of).toList();
 	}
 
 	@Override

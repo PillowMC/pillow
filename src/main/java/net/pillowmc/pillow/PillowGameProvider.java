@@ -24,20 +24,27 @@
 
 package net.pillowmc.pillow;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.LibraryFinder;
 import org.quiltmc.loader.api.Version;
 import org.quiltmc.loader.impl.entrypoint.GameTransformer;
 import org.quiltmc.loader.impl.game.GameProvider;
+import org.quiltmc.loader.impl.game.GameProviderHelper;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncher;
 import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 import org.quiltmc.loader.impl.metadata.qmj.V1ModMetadataBuilder;
 import org.quiltmc.loader.impl.util.Arguments;
+import org.quiltmc.loader.impl.util.SystemProperties;
 
 public class PillowGameProvider implements GameProvider {
 	private String[] args;
@@ -118,6 +125,23 @@ public class PillowGameProvider implements GameProvider {
 
 	@Override
 	public void initialize(QuiltLauncher launcher) {
+		var side = Utils.getSide().name().toLowerCase();
+		var mc = LibraryFinder.findPathForMaven("net.minecraft", side, "", "slim",
+				FMLLoader.versionInfo().mcAndNeoFormVersion());
+		var deobf = GameProviderHelper
+				.deobfuscate(Map.of(side, mc), getGameId(), getNormalizedGameVersion(), getLaunchDirectory(), launcher)
+				.get(side);
+		try {
+			var pillowdir = FMLPaths.GAMEDIR.get().resolve(".pillow");
+			if (!Files.isDirectory(pillowdir)) {
+				Files.createDirectory(pillowdir);
+			}
+			var rcp = pillowdir.resolve("remapClasspath.txt");
+			Files.writeString(rcp, deobf.toString());
+			System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, rcp.toString());
+		} catch (IOException e) {
+			throw new UncheckedIOException("Cannot generate remapClasspath!", e);
+		}
 	}
 
 	@Override
