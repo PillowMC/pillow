@@ -44,10 +44,6 @@ cat > net.pillowmc.pillow.json << EOF
             "url": "file://$MAVEN_LOCAL"
         },
         {
-            "name": "net.pillowmc:pillow:0.2.3:langprovider",
-            "url": "file://$MAVEN_LOCAL"
-        },
-        {
             "name": "net.pillowmc:intermediary2srg:1.20.4",
             "url": "file://$MAVEN_LOCAL"
         }
