@@ -75,7 +75,8 @@ public class MixinServicePillow extends MixinServiceModLauncher {
 						}
 						return Files.newInputStream(modResource);
 					} catch (IOException e) {
-						throw new UncheckedIOException("Failed to read file '" + resource + "' from mod '" + mod + "'!", e);
+						throw new UncheckedIOException("Failed to read file '" + resource + "' from mod '" + mod + "'!",
+								e);
 					}
 				}
 			}
