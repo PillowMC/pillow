@@ -43,4 +43,4 @@ _Not opened yet._
 
 ## <span id="license">License</span>
 
-This project is licensed under [LGPL v2.1 License](LICENSE) since v0.3.1. Versions v0.3.0 or below is licensed under MIT License.
+This project is licensed under GPL v3.0 License since v0.3.4, LGPL v2.1 License since v0.3.1. Versions v0.3.0 or below is licensed under MIT License.
