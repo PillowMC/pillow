@@ -64,7 +64,7 @@ configurations {
 }
 
 dependencies {
-    implementation "net.neoforged.fancymodloader:loader:4.0.31"
+    implementation "net.neoforged.fancymodloader:loader:5.0.6"
     implementation "cpw.mods:modlauncher:11.0.4"
     implementation "cpw.mods:securejarhandler:3.0.4"
     implementation "org.jetbrains:annotations:24.1.0"
