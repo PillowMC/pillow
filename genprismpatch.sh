@@ -7,7 +7,6 @@ MC_VERSION=1.21.3
 NEOFORM_VERSION=20241023.131943
 FML_VERSION=5.0.6
 NEOFORGE_VERSION=21.3.5-beta
-QUILT_LOADER_VERSION=0.26.3
 PILLOW_LOADER_VERSION=`sed -rn "s#version \= \"(.*)\"#\1#p" build.gradle`
 read -rp "Please input PrismLauncher path (default to ~/.local/share/PrismLauncher):" PRISM_PATH
 if [ -z $PRISM_PATH ]; then
