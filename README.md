@@ -1,3 +1,5 @@
+<h1>⚠️ THIS REPO HAVE BEEN MOVED TO <a href="https://codeberg.org/PillowMC/pillow">CODEBERG</a>.</h1>
+
 # Pillow Mod Loader
 
 ![Github stars](https://img.shields.io/github/stars/PillowMC/pillow.svg)
